@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Driver Intelligence Pro</title>
+    <title>Driver Intelligence Pro v3</title>
     <style>
-        :root { --primary: #27ae60; --secondary: #2c3e50; --bg: #f4f7f6; --white: #ffffff; --danger: #e74c3c; --accent: #3498db; }
+        :root { --primary: #27ae60; --dark-green: #1e8449; --secondary: #2c3e50; --bg: #f4f7f6; --white: #ffffff; --danger: #e74c3c; --accent: #3498db; }
         body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); margin: 0; padding-bottom: 90px; color: #333; }
         header { background: var(--secondary); color: white; padding: 15px; text-align: center; position: sticky; top: 0; z-index: 100; }
         .container { padding: 12px; max-width: 600px; margin: auto; }
@@ -17,13 +17,20 @@
         label { display: block; font-size: 0.75rem; margin-bottom: 3px; font-weight: 700; color: #7f8c8d; }
         input { width: 100%; padding: 10px; border: 1px solid #dfe6e9; border-radius: 8px; box-sizing: border-box; font-size: 1rem; background: #fafafa; }
         
+        /* Painel de Cálculo (Verde Claro) */
         .live-calc { background: #f1fcf4; border-left: 5px solid var(--primary); padding: 12px; border-radius: 8px; margin-top: 5px; }
-        .live-row { display: flex; justify-content: space-between; font-size: 0.9rem; margin: 4px 0; }
+        .live-row { display: flex; justify-content: space-between; font-size: 0.9rem; margin: 5px 0; }
         .res-bold { font-weight: 800; color: var(--primary); }
+        .res-danger { font-weight: 800; color: var(--danger); }
 
         .btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; transition: 0.2s; margin-top: 5px; }
         .btn-save { background: var(--primary); color: white; }
         .btn-export { background: var(--accent); color: white; margin-top: 15px; }
+        
+        /* Badges da Meta */
+        .badge { background: #eee; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; color: #7f8c8d; }
+        .badge-success { background: var(--primary); color: white; font-weight: bold; }
+        .badge-over { background: var(--dark-green); color: white; font-weight: bold; }
         
         /* Tabela e Filtros */
         .filter-area { display: flex; gap: 5px; align-items: flex-end; margin-bottom: 10px; }
@@ -31,11 +38,11 @@
         th { background: #f8f9fa; padding: 10px; text-align: left; border-bottom: 2px solid #eee; }
         td { padding: 10px; border-bottom: 1px solid #eee; vertical-align: middle; }
         
+        /* Navegação Inferior */
         .nav-tabs { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; height: 70px; z-index: 1000; }
         .tab-item { flex: 1; display: flex; align-items: center; justify-content: center; flex-direction: column; font-size: 0.75rem; color: #bdc3c7; cursor: pointer; }
         .tab-item.active { color: var(--primary); font-weight: bold; }
         .hidden { display: none; }
-        .badge { background: #eee; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; }
     </style>
 </head>
 <body>
@@ -47,32 +54,36 @@
         <div class="card">
             <div class="grid-inputs">
                 <div class="input-group"><label>DATA</label><input type="date" id="data_turno"></div>
-                <div class="input-group"><label>META DIA (R$)</label><input type="number" id="meta_dia" value="300" oninput="calcularLive()"></div>
+                <div class="input-group"><label>META DIA (LÍQUIDA R$)</label><input type="number" id="meta_dia" value="150" oninput="calcularLive()"></div>
             </div>
             <div class="grid-inputs">
-                <div class="input-group"><label>KM RODADOS</label><input type="number" id="km_rodados" oninput="calcularLive()"></div>
-                <div class="input-group"><label>HORAS ONLINE</label><input type="number" step="0.1" id="horas_online" placeholder="Ex: 8.5" oninput="calcularLive()"></div>
+                <div class="input-group"><label>KM RODADOS</label><input type="number" id="km_rodados" placeholder="Ex: 89" oninput="calcularLive()"></div>
+                <div class="input-group"><label>HORAS ONLINE</label><input type="number" step="0.1" id="horas_online" placeholder="Ex: 3" oninput="calcularLive()"></div>
             </div>
             <div class="grid-inputs">
-                <div class="input-group"><label>MÉDIA KM/L</label><input type="number" id="km_litro" oninput="calcularLive()"></div>
-                <div class="input-group"><label>GASOLINA (R$)</label><input type="number" id="preco_gas" step="0.01" oninput="calcularLive()"></div>
+                <div class="input-group"><label>MÉDIA KM/L</label><input type="number" id="km_litro" placeholder="Ex: 11,5" oninput="calcularLive()"></div>
+                <div class="input-group"><label>GASOLINA (R$)</label><input type="number" id="preco_gas" step="0.01" placeholder="Ex: 6,35" oninput="calcularLive()"></div>
             </div>
         </div>
 
         <div class="card">
             <h3>Ganhos por App</h3>
             <div class="grid-inputs">
-                <div class="input-group"><label>UBER</label><input type="number" id="g_uber" class="ganho-in" oninput="calcularLive()"></div>
-                <div class="input-group"><label>99</label><input type="number" id="g_99" class="ganho-in" oninput="calcularLive()"></div>
-                <div class="input-group"><label>SHOPEE</label><input type="number" id="g_shopee" class="ganho-in" oninput="calcularLive()"></div>
-                <div class="input-group"><label>PARTICULAR</label><input type="number" id="g_part" class="ganho-in" oninput="calcularLive()"></div>
+                <div class="input-group"><label>UBER</label><input type="number" id="g_uber" class="ganho-in" placeholder="Ex: 45,15" oninput="calcularLive()"></div>
+                <div class="input-group"><label>99</label><input type="number" id="g_99" class="ganho-in" placeholder="Ex: 98,35" oninput="calcularLive()"></div>
+                <div class="input-group"><label>SHOPEE</label><input type="number" id="g_shopee" class="ganho-in" placeholder="0" oninput="calcularLive()"></div>
+                <div class="input-group"><label>PARTICULAR</label><input type="number" id="g_part" class="ganho-in" placeholder="Ex: 150" oninput="calcularLive()"></div>
             </div>
 
-            <div class="live-calc">
-                <div class="live-row"><span>LUCRO LÍQUIDO:</span> <span id="live-lucro" class="res-bold" style="font-size:1.2rem">R$ 0,00</span></div>
-                <div class="live-row"><span>VALOR POR HORA:</span> <span id="live-hora" class="res-bold">R$ 0,00/h</span></div>
-                <div class="live-row"><span>VALOR POR KM:</span> <span id="live-rkm" class="res-bold">R$ 0,00/km</span></div>
-                <div class="live-row"><span>META ATINGIDA:</span> <span id="live-meta" class="badge">0%</span></div>
+            <div class="live-calc" id="painel-resultados">
+                <div class="live-row"><span>FATURAMENTO BRUTO:</span> <span class="res-bold">R$ 0,00</span></div>
+                <div class="live-row"><span>CUSTO COMBUSTÍVEL:</span> <span class="res-danger">- R$ 0,00</span></div>
+                <div class="live-row" style="border-top: 1px solid #c8e6c9; padding-top: 5px; margin-top: 5px;">
+                    <span>LUCRO LÍQUIDO:</span> <span class="res-bold" style="font-size:1.2rem">R$ 0,00</span>
+                </div>
+                <div class="live-row"><span>VALOR POR HORA (LÍQUIDO):</span> <span class="res-bold">R$ 0,00/h</span></div>
+                <div class="live-row"><span>VALOR POR KM (BRUTO):</span> <span class="res-bold">R$ 0,00/km</span></div>
+                <div class="live-row"><span>META ATINGIDA:</span> <span class="badge">0% da Meta</span></div>
             </div>
         </div>
         <button class="btn btn-save" id="btn-main-save" onclick="salvarTurno()">SALVAR TURNO</button>
@@ -84,13 +95,13 @@
             <div class="filter-area">
                 <div style="flex:1"><label>DE:</label><input type="date" id="filtro_inicio"></div>
                 <div style="flex:1"><label>ATÉ:</label><input type="date" id="filtro_fim"></div>
-                <button class="btn btn-save" style="width:45px; padding:10px;" onclick="renderHistorico()">ok</button>
+                <button class="btn btn-save" style="width:45px; padding:10px; margin:0;" onclick="renderHistorico()">ok</button>
             </div>
         </div>
 
         <div class="card" style="padding:0; overflow:hidden;">
             <table>
-                <thead><tr><th>Data</th><th>Lucro</th><th>R$/H</th><th>Ação</th></tr></thead>
+                <thead><tr><th>Data</th><th>Lucro (R$)</th><th>R$/H (Líq)</th><th>Ação</th></tr></thead>
                 <tbody id="lista-historico"></tbody>
             </table>
         </div>
@@ -109,65 +120,93 @@
 </nav>
 
 <script>
-    // Inicialização
+    // Inicialização de datas
     const hoje = new Date().toISOString().split('T')[0];
     document.getElementById('data_turno').value = hoje;
     document.getElementById('filtro_inicio').value = hoje;
     document.getElementById('filtro_fim').value = hoje;
 
+    // Função auxiliar para aceitar vírgula ou ponto e retornar número decimal
+    const formatNum = (id) => {
+        let val = document.getElementById(id).value.toString().trim();
+        val = val.replace(',', '.'); // Conversão de vírgula para ponto
+        return parseFloat(val) || 0;
+    };
+
     function calcularLive() {
-        const km = parseFloat(document.getElementById('km_rodados').value) || 0;
-        const kml = parseFloat(document.getElementById('km_litro').value) || 0;
-        const gas = parseFloat(document.getElementById('preco_gas').value) || 0;
-        const horas = parseFloat(document.getElementById('horas_online').value) || 0;
-        const meta = parseFloat(document.getElementById('meta_dia').value) || 1;
+        // Coleta de dados com tratamento de vírgula
+        const km = formatNum('km_rodados');
+        const kml = formatNum('km_litro');
+        const gas = formatNum('preco_gas');
+        const horas = formatNum('horas_online');
+        const meta = formatNum('meta_dia') || 1; // Evita divisão por zero
         
         let bruto = 0;
-        document.querySelectorAll('.ganho-in').forEach(input => bruto += parseFloat(input.value) || 0);
+        document.querySelectorAll('.ganho-in').forEach(input => {
+            let val = input.value.toString().replace(',', '.');
+            bruto += parseFloat(val) || 0;
+        });
 
+        // Cálculos
         const custo = kml > 0 ? (km / kml) * gas : 0;
         const lucro = bruto - custo;
-        const rkm = km > 0 ? bruto / km : 0;
-        const rhora = horas > 0 ? lucro / horas : 0;
-        const pMeta = Math.min((bruto / meta) * 100, 100);
-
-        document.getElementById('live-lucro').innerText = `R$ ${lucro.toFixed(2)}`;
-        document.getElementById('live-hora').innerText = `R$ ${rhora.toFixed(2)}/h`;
-        document.getElementById('live-rkm').innerText = `R$ ${rkm.toFixed(2)}/km`;
-        document.getElementById('live-meta').innerText = `${pMeta.toFixed(0)}% da Meta`;
+        const rkm = km > 0 ? bruto / km : 0; // Ganho bruto por km
+        const rhora = horas > 0 ? lucro / horas : 0; // Lucro líquido por hora
         
+        // Meta calculada sobre o LUCRO LÍQUIDO e sem travar em 100%
+        const pMeta = (lucro / meta) * 100;
+
+        // Determina a cor do badge da meta
+        let metaBadgeClass = 'badge';
+        if(pMeta >= 100 && pMeta < 120) metaBadgeClass += ' badge-success'; // Verde normal
+        if(pMeta >= 120) metaBadgeClass += ' badge-over'; // Verde escuro (para grandes dias)
+
+        // Atualização da Interface (Painel Verde Claro)
+        document.getElementById('painel-resultados').innerHTML = `
+            <div class="live-row"><span>FATURAMENTO BRUTO:</span> <span class="res-bold">R$ ${bruto.toFixed(2)}</span></div>
+            <div class="live-row"><span>CUSTO COMBUSTÍVEL:</span> <span class="res-danger">- R$ ${custo.toFixed(2)}</span></div>
+            <div class="live-row" style="border-top: 1px solid #c8e6c9; padding-top: 5px; margin-top: 5px;">
+                <span>LUCRO LÍQUIDO:</span> <span class="res-bold" style="font-size:1.2rem">R$ ${lucro.toFixed(2)}</span>
+            </div>
+            <div class="live-row"><span>VALOR POR HORA (LÍQUIDO):</span> <span class="res-bold">R$ ${rhora.toFixed(2)}/h</span></div>
+            <div class="live-row"><span>VALOR POR KM (BRUTO):</span> <span class="res-bold">R$ ${rkm.toFixed(2)}/km</span></div>
+            <div class="live-row"><span>META ATINGIDA:</span> <span class="${metaBadgeClass}">${pMeta.toFixed(1)}% da Meta</span></div>
+        `;
+        
+        // Retorna dados para o salvarTurno()
         return { bruto, custo, lucro, km, kml, gas, horas, rhora, meta,
-                 g_uber: parseFloat(document.getElementById('g_uber').value)||0, 
-                 g_99: parseFloat(document.getElementById('g_99').value)||0, 
-                 g_shopee: parseFloat(document.getElementById('g_shopee').value)||0, 
-                 g_part: parseFloat(document.getElementById('g_part').value)||0 };
+                 g_uber: formatNum('g_uber'), 
+                 g_99: formatNum('g_99'), 
+                 g_shopee: formatNum('g_shopee'), 
+                 g_part: formatNum('g_part') };
     }
 
     function salvarTurno() {
         const calc = calcularLive();
         const data = document.getElementById('data_turno').value;
-        if(calc.km <= 0) return alert("Insira os KM para salvar.");
+        if(calc.km <= 0) return alert("Insira os KM rodados para salvar o turno.");
 
         const registro = { data, ...calc };
-        let historico = JSON.parse(localStorage.getItem('driver_history_v2') || '[]');
+        let historico = JSON.parse(localStorage.getItem('driver_history_v3') || '[]');
         
+        // Se já existe essa data (edição), sobrescreve; senão, adiciona no início
         const index = historico.findIndex(item => item.data === data);
         if(index !== -1) historico[index] = registro;
-        else historico.push(registro);
+        else historico.unshift(registro);
 
-        localStorage.setItem('driver_history_v2', JSON.stringify(historico));
-        alert("Salvo!");
-        switchTab('stats');
+        localStorage.setItem('driver_history_v3', JSON.stringify(historico));
+        alert("Turno salvo com sucesso!");
+        switchTab('stats'); // Muda para a tela de relatórios
     }
 
     function renderHistorico() {
-        let historico = JSON.parse(localStorage.getItem('driver_history_v2') || '[]');
+        let historico = JSON.parse(localStorage.getItem('driver_history_v3') || '[]');
         const inicio = document.getElementById('filtro_inicio').value;
         const fim = document.getElementById('filtro_fim').value;
         
-        // Filtro por data
+        // Filtro por período de datas selecionado
         historico = historico.filter(i => i.data >= inicio && i.data <= fim);
-        historico.sort((a,b) => b.data.localeCompare(a.data));
+        historico.sort((a,b) => b.data.localeCompare(a.data)); // Ordena por data (mais recente primeiro)
 
         const tabela = document.getElementById('lista-historico');
         const resumo = document.getElementById('resumo-periodo-content');
@@ -175,36 +214,45 @@
         
         let tKm = 0, tLucro = 0, tHoras = 0, tBruto = 0;
 
+        // Preenche a tabela
         historico.forEach(item => {
-            const dataExibicao = item.data.split('-').reverse().slice(0,2).join('/');
+            const dataExibicao = item.data.split('-').reverse().slice(0,2).join('/'); // Formato dd/mm
             tabela.innerHTML += `<tr>
                 <td>${dataExibicao}</td>
                 <td style="color:var(--primary); font-weight:bold">R$ ${item.lucro.toFixed(2)}</td>
-                <td>R$ ${item.rhora.toFixed(2)}</td>
+                <td>R$ ${item.rhora.toFixed(2)}/h</td>
                 <td>
-                    <button style="color:var(--accent); border:none; background:none" onclick="editarRegistro('${item.data}')">✎</button>
-                    <button style="color:var(--danger); border:none; background:none; margin-left:8px" onclick="deletarRegistro('${item.data}')">✕</button>
+                    <button style="color:var(--accent); border:none; background:none; cursor:pointer;" onclick="editarRegistro('${item.data}')">✎</button>
+                    <button style="color:var(--danger); border:none; background:none; cursor:pointer; margin-left:12px" onclick="deletarRegistro('${item.data}')">✕</button>
                 </td>
             </tr>`;
             tKm += item.km; tLucro += item.lucro; tHoras += item.horas; tBruto += item.bruto;
         });
 
+        // Atualiza o resumo financeiro do período
         if(historico.length > 0) {
             resumo.innerHTML = `
                 <div class="live-row"><span>LUCRO TOTAL:</span> <span>R$ ${tLucro.toFixed(2)}</span></div>
-                <div class="live-row"><span>TOTAL HORAS:</span> <span>${tHoras.toFixed(1)}h</span></div>
-                <div class="live-row"><span>KM TOTAL:</span> <span>${tKm.toFixed(1)}km</span></div>
+                <div class="live-row"><span>FATURAMENTO BRUTO:</span> <span>R$ ${tBruto.toFixed(2)}</span></div>
+                <div class="live-row"><span>TOTAL KM RODADOS:</span> <span>${tKm.toFixed(1)} km</span></div>
+                <div class="live-row"><span>TOTAL HORAS ONLINE:</span> <span>${tHoras.toFixed(1)}h</span></div>
                 <div class="live-row" style="border-top:1px solid #555; margin-top:10px; padding-top:5px; font-weight:bold">
-                    <span>MÉDIA R$/HORA:</span> <span>R$ ${(tLucro/tHoras || 0).toFixed(2)}/h</span>
+                    <span>MÉDIA LÍQUIDA/HORA:</span> <span>R$ ${(tLucro/tHoras || 0).toFixed(2)}/h</span>
+                </div>
+                <div class="live-row">
+                    <span>MÉDIA LÍQUIDA/KM:</span> <span>R$ ${(tLucro/tKm || 0).toFixed(2)}/km</span>
                 </div>
             `;
-        } else { resumo.innerHTML = "Nenhum dado neste período."; }
+        } else {
+            resumo.innerHTML = "Nenhum dado cadastrado neste período.";
+        }
     }
 
     function editarRegistro(data) {
-        const historico = JSON.parse(localStorage.getItem('driver_history_v2') || '[]');
+        const historico = JSON.parse(localStorage.getItem('driver_history_v3') || '[]');
         const item = historico.find(i => i.data === data);
         if(item) {
+            // Preenche os campos de input com os dados salvos
             document.getElementById('data_turno').value = item.data;
             document.getElementById('km_rodados').value = item.km;
             document.getElementById('km_litro').value = item.kml;
@@ -214,39 +262,53 @@
             document.getElementById('g_99').value = item.g_99;
             document.getElementById('g_shopee').value = item.g_shopee;
             document.getElementById('g_part').value = item.g_part;
-            switchTab('launch');
-            calcularLive();
+            
+            switchTab('launch'); // Muda para a tela de lançamento
+            calcularLive(); // Recalcula o painel verde
+            document.getElementById('btn-main-save').innerText = "ATUALIZAR TURNO"; // Feedback visual
         }
     }
 
     function deletarRegistro(data) {
-        if(confirm("Excluir dia " + data + "?")) {
-            let historico = JSON.parse(localStorage.getItem('driver_history_v2') || '[]');
+        // Formata a data para dd/mm/aaaa no confirm
+        const dataBr = data.split('-').reverse().join('/');
+        if(confirm("Tem certeza que deseja excluir o lançamento do dia " + dataBr + "?")) {
+            let historico = JSON.parse(localStorage.getItem('driver_history_v3') || '[]');
             historico = historico.filter(i => i.data !== data);
-            localStorage.setItem('driver_history_v2', JSON.stringify(historico));
-            renderHistorico();
+            localStorage.setItem('driver_history_v3', JSON.stringify(historico));
+            renderHistorico(); // Atualiza a tabela
         }
     }
 
     function switchTab(tab) {
         document.getElementById('tab-launch').classList.toggle('hidden', tab !== 'launch');
         document.getElementById('tab-stats').classList.toggle('hidden', tab !== 'stats');
+        
+        // Atualiza a navegação inferior
         document.querySelectorAll('.tab-item').forEach((el, idx) => {
             el.classList.toggle('active', (tab === 'launch' && idx === 0) || (tab === 'stats' && idx === 1));
         });
+        
+        // Título e ações específicas
         if(tab === 'stats') renderHistorico();
+        if(tab === 'launch') {
+            document.getElementById('btn-main-save').innerText = "SALVAR TURNO";
+        }
         document.getElementById('page-title').innerText = tab === 'launch' ? 'Lançamento' : 'Relatórios';
     }
 
     function exportarDados() {
-        const hist = localStorage.getItem('driver_history_v2');
-        if(!hist) return alert("Sem dados para exportar.");
+        const hist = localStorage.getItem('driver_history_v3');
+        if(!hist) return alert("Nenhum dado cadastrado para exportar.");
+        
+        // Cria um backup textual do histórico (JSON) e faz o download
         const blob = new Blob([hist], {type: 'application/json'});
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'backup_motorista.json';
+        a.download = `driver_backup_${new Date().toISOString().split('T')[0]}.json`;
         a.click();
+        URL.revokeObjectURL(url); // Limpa a memória
     }
 </script>
 </body>

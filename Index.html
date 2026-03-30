@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Driver Intelligence Pro - Final</title>
+    <title>Driver Intelligence Pro - Performance</title>
     <style>
-        :root { --primary: #27ae60; --dark-green: #1e8449; --secondary: #2c3e50; --bg: #f4f7f6; --white: #ffffff; --danger: #e74c3c; --accent: #3498db; }
+        :root { --primary: #27ae60; --dark-green: #1e8449; --secondary: #2c3e50; --bg: #f4f7f6; --white: #ffffff; --danger: #e74c3c; --accent: #3498db; --warning: #f39c12; }
         body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); margin: 0; padding-bottom: 90px; color: #333; }
         header { background: var(--secondary); color: white; padding: 15px; text-align: center; position: sticky; top: 0; z-index: 100; }
         .container { padding: 12px; max-width: 600px; margin: auto; }
@@ -22,6 +22,11 @@
         .res-bold { font-weight: 800; color: var(--primary); }
         .res-danger { font-weight: 800; color: var(--danger); }
 
+        .performance-tag { text-align: center; padding: 8px; border-radius: 6px; font-weight: bold; margin-bottom: 10px; font-size: 0.9rem; text-transform: uppercase; }
+        .perf-pessimo { background: #ffdada; color: var(--danger); }
+        .perf-media { background: #dbe9ff; color: var(--accent); }
+        .perf-excelente { background: #d4edda; color: var(--dark-green); }
+
         .btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; transition: 0.2s; margin-top: 5px; }
         .btn-save { background: var(--primary); color: white; }
         .btn-export { background: var(--accent); color: white; margin-top: 15px; }
@@ -29,11 +34,6 @@
         .badge { background: #eee; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; color: #7f8c8d; }
         .badge-success { background: var(--primary); color: white; font-weight: bold; }
         .badge-over { background: var(--dark-green); color: white; font-weight: bold; }
-        
-        .filter-area { display: flex; gap: 5px; align-items: flex-end; margin-bottom: 10px; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.8rem; background: white; border-radius: 8px; overflow: hidden; }
-        th { background: #f8f9fa; padding: 10px; text-align: left; border-bottom: 2px solid #eee; }
-        td { padding: 10px; border-bottom: 1px solid #eee; vertical-align: middle; }
         
         .nav-tabs { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; height: 70px; z-index: 1000; }
         .tab-item { flex: 1; display: flex; align-items: center; justify-content: center; flex-direction: column; font-size: 0.75rem; color: #bdc3c7; cursor: pointer; }
@@ -70,6 +70,8 @@
                 <div class="input-group"><label>SHOPEE</label><input type="number" id="g_shopee" class="ganho-in" placeholder="0" oninput="calcularLive()"></div>
                 <div class="input-group"><label>PARTICULAR</label><input type="number" id="g_part" class="ganho-in" placeholder="0" oninput="calcularLive()"></div>
             </div>
+
+            <div id="status-comentario"></div>
 
             <div class="live-calc" id="painel-resultados">
                 </div>
@@ -135,6 +137,27 @@
         const rhora = horas > 0 ? lucro / horas : 0;
         const pMeta = (lucro / meta) * 100;
 
+        // Lógica de Comentários/Status
+        const divStatus = document.getElementById('status-comentario');
+        let statusTxt = "";
+        let statusClass = "";
+
+        if (rhora > 0) {
+            if (rhora >= 35 && rkm >= 2.5) {
+                statusTxt = "Excelente: Dia de Meta Batida! 🚀";
+                statusClass = "perf-excelente";
+            } else if (rhora < 30 || rkm < 1.6) {
+                statusTxt = "Péssimo: Pagou para trabalhar hoje 🛑";
+                statusClass = "perf-pessimo";
+            } else {
+                statusTxt = "Na Média: Trabalho consistente 🆗";
+                statusClass = "perf-media";
+            }
+            divStatus.innerHTML = `<div class="performance-tag ${statusClass}">${statusTxt}</div>`;
+        } else {
+            divStatus.innerHTML = "";
+        }
+
         let metaBadgeClass = 'badge';
         if(pMeta >= 100) metaBadgeClass += (pMeta >= 120 ? ' badge-over' : ' badge-success');
 
@@ -149,7 +172,7 @@
             <div class="live-row"><span>META ATINGIDA:</span> <span class="${metaBadgeClass}">${pMeta.toFixed(1)}% da Meta</span></div>
         `;
         
-        return { bruto, custo, lucro, km, kml, gas, horas, rhora, meta,
+        return { bruto, custo, lucro, km, kml, gas, horas, rhora, meta, rkm,
                  g_uber: formatNum('g_uber'), g_99: formatNum('g_99'), 
                  g_shopee: formatNum('g_shopee'), g_part: formatNum('g_part') };
     }
@@ -159,17 +182,17 @@
         if(calc.km <= 0) return alert("Insira os KM rodados.");
         const data = document.getElementById('data_turno').value;
         const registro = { data, ...calc };
-        let historico = JSON.parse(localStorage.getItem('driver_history_final') || '[]');
+        let historico = JSON.parse(localStorage.getItem('driver_history_v4') || '[]');
         const index = historico.findIndex(item => item.data === data);
         if(index !== -1) historico[index] = registro;
         else historico.unshift(registro);
-        localStorage.setItem('driver_history_final', JSON.stringify(historico));
+        localStorage.setItem('driver_history_v4', JSON.stringify(historico));
         alert("Turno salvo!");
         switchTab('stats');
     }
 
     function renderHistorico() {
-        let historico = JSON.parse(localStorage.getItem('driver_history_final') || '[]');
+        let historico = JSON.parse(localStorage.getItem('driver_history_v4') || '[]');
         const inicio = document.getElementById('filtro_inicio').value;
         const fim = document.getElementById('filtro_fim').value;
         
@@ -217,21 +240,18 @@
                     <span>MÉDIA LÍQUIDA/HORA:</span> <span style="font-weight:bold">R$ ${(tLucro/tHoras || 0).toFixed(2)}/h</span>
                 </div>
                 <div class="live-row">
-                    <span>MÉDIA LÍQUIDA/KM:</span> <span style="font-weight:bold">R$ ${(tLucro/tKm || 0).toFixed(2)}/km</span>
+                    <span>MÉDIA BRUTA/KM:</span> <span style="font-weight:bold">R$ ${(tBruto/tKm || 0).toFixed(2)}/km</span>
                 </div>
                 
                 <div class="live-row" style="border-top:1px solid #555; margin-top:10px; padding-top:5px; font-size:0.8rem; opacity:0.8">
                     <span>KM PARA PAGAR CUSTO:</span> <span>${(tCusto / (tBruto/tKm || 1)).toFixed(1)} km</span>
                 </div>
-                <div class="live-row" style="font-size:0.8rem; opacity:0.8">
-                    <span>FATURAMENTO BRUTO:</span> <span>R$ ${tBruto.toFixed(2)}</span>
-                </div>
             `;
-        } else { resumo.innerHTML = "Sem dados no período."; }
+        } else { resumo.innerHTML = "Sem dados."; }
     }
 
     function editarRegistro(data) {
-        const item = JSON.parse(localStorage.getItem('driver_history_final')).find(i => i.data === data);
+        const item = JSON.parse(localStorage.getItem('driver_history_v4')).find(i => i.data === data);
         if(item) {
             document.getElementById('data_turno').value = item.data;
             document.getElementById('km_rodados').value = item.km;
@@ -250,8 +270,8 @@
 
     function deletarRegistro(data) {
         if(confirm("Excluir dia " + data.split('-').reverse().join('/') + "?")) {
-            let hist = JSON.parse(localStorage.getItem('driver_history_final')).filter(i => i.data !== data);
-            localStorage.setItem('driver_history_final', JSON.stringify(hist));
+            let hist = JSON.parse(localStorage.getItem('driver_history_v4')).filter(i => i.data !== data);
+            localStorage.setItem('driver_history_v4', JSON.stringify(hist));
             renderHistorico();
         }
     }
@@ -267,7 +287,7 @@
     }
 
     function exportarDados() {
-        const hist = localStorage.getItem('driver_history_final');
+        const hist = localStorage.getItem('driver_history_v4');
         const blob = new Blob([hist], {type: 'application/json'});
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
@@ -275,7 +295,6 @@
         a.click();
     }
     
-    // Inicia cálculos na abertura
     calcularLive();
 </script>
 </body>

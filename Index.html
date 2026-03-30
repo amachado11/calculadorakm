@@ -3,247 +3,192 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Driver Stats - Lucro Real</title>
+    <title>Driver Stats Pro</title>
     <style>
-        :root {
-            --primary: #2ecc71;
-            --secondary: #34495e;
-            --bg: #f4f7f6;
-            --text: #2c3e50;
-            --white: #ffffff;
-        }
-
-        body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            padding-bottom: 70px;
-        }
-
-        header {
-            background-color: var(--secondary);
-            color: var(--white);
-            padding: 1rem;
-            text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        .container {
-            padding: 15px;
-            max-width: 500px;
-            margin: auto;
-        }
-
-        .card {
-            background: var(--white);
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        }
-
-        h3 { margin-top: 0; border-bottom: 2px solid var(--bg); padding-bottom: 8px; }
-
-        .input-group { margin-bottom: 15px; }
-        label { display: block; font-size: 0.9rem; margin-bottom: 5px; font-weight: bold; }
+        :root { --primary: #27ae60; --secondary: #2c3e50; --bg: #f0f2f5; --white: #ffffff; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding-bottom: 80px; }
+        header { background: var(--secondary); color: white; padding: 15px; text-align: center; }
+        .container { padding: 15px; max-width: 600px; margin: auto; }
+        .card { background: var(--white); padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h3 { margin: 0 0 15px 0; font-size: 1.1rem; color: var(--secondary); border-bottom: 1px solid #eee; padding-bottom: 5px; }
         
-        input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            box-sizing: border-box;
-            font-size: 1rem;
-            background: #fafafa;
-        }
+        .grid-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .input-group { margin-bottom: 12px; }
+        label { display: block; font-size: 0.85rem; margin-bottom: 4px; font-weight: 600; color: #555; }
+        input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 1rem; }
+        
+        /* Painel de Cálculo em Tempo Real */
+        .live-calc { background: #e8f5e9; border-left: 5px solid var(--primary); padding: 10px; margin-top: 10px; border-radius: 4px; }
+        .live-row { display: flex; justify-content: space-between; font-size: 0.95rem; margin: 3px 0; }
+        .res-bold { font-weight: bold; color: var(--primary); }
 
-        button {
-            width: 100%;
-            padding: 15px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
-        }
+        .btn-save { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 1.1rem; cursor: pointer; }
+        
+        /* Tabela de Histórico */
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        th { background: #eee; padding: 8px; text-align: left; }
+        td { padding: 8px; border-bottom: 1px solid #eee; }
+        .resumo-semana { background: var(--secondary); color: white; padding: 15px; border-radius: 8px; margin-top: 15px; }
 
-        .btn-save { background-color: var(--primary); color: white; }
-        .btn-save:active { transform: scale(0.98); opacity: 0.9; }
-
-        /* Navegação Inferior */
-        .nav-tabs {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            background: var(--white);
-            display: flex;
-            border-top: 1px solid #ddd;
-            height: 60px;
-        }
-
-        .tab-item {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            font-size: 0.8rem;
-            color: #7f8c8d;
-            cursor: pointer;
-        }
-
+        .nav-tabs { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; height: 65px; }
+        .tab-item { flex: 1; display: flex; align-items: center; justify-content: center; flex-direction: column; font-size: 0.8rem; color: #95a5a6; cursor: pointer; }
         .tab-item.active { color: var(--primary); font-weight: bold; }
-
-        /* Tela de Gráficos/Resumo */
         .hidden { display: none; }
-        .stat-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
-        .val { font-weight: bold; color: var(--primary); }
-        .negative { color: #e74c3c; }
     </style>
 </head>
 <body>
 
-<header>
-    <h2 id="page-title">Lançamento de Turno</h2>
-</header>
+<header><h2 id="page-title">Lançamento de Turno</h2></header>
 
 <div class="container">
     <div id="tab-launch">
         <div class="card">
-            <h3>Rodagem & Custo</h3>
             <div class="input-group">
-                <label>KM Rodados</label>
-                <input type="number" id="km_rodados" placeholder="Ex: 150">
+                <label>Data do Turno</label>
+                <input type="date" id="data_turno">
             </div>
-            <div class="input-group">
-                <label>Média (KM/L)</label>
-                <input type="number" id="km_litro" placeholder="Ex: 12.5">
+            <div class="grid-inputs">
+                <div class="input-group"><label>KM Rodados</label><input type="number" id="km_rodados" oninput="calcularLive()"></div>
+                <div class="input-group"><label>Média KM/L</label><input type="number" id="km_litro" oninput="calcularLive()"></div>
             </div>
-            <div class="input-group">
-                <label>Preço Gasolina (R$)</label>
-                <input type="number" id="preco_gas" step="0.01" placeholder="Ex: 5.89">
-            </div>
+            <div class="input-group"><label>Preço Gasolina (R$)</label><input type="number" id="preco_gas" step="0.01" oninput="calcularLive()"></div>
         </div>
 
         <div class="card">
-            <h3>Ganhos por Plataforma</h3>
-            <div class="input-group"><label>Uber</label><input type="number" id="ganho_uber" step="0.01"></div>
-            <div class="input-group"><label>99</label><input type="number" id="ganho_99" step="0.01"></div>
-            <div class="input-group"><label>Shopee</label><input type="number" id="ganho_shopee" step="0.01"></div>
-            <div class="input-group"><label>Particular</label><input type="number" id="ganho_part" step="0.01"></div>
-        </div>
+            <h3>Ganhos</h3>
+            <div class="grid-inputs">
+                <div class="input-group"><label>Uber</label><input type="number" id="g_uber" class="ganho-in" oninput="calcularLive()"></div>
+                <div class="input-group"><label>99</label><input type="number" id="g_99" class="ganho-in" oninput="calcularLive()"></div>
+                <div class="input-group"><label>Shopee</label><input type="number" id="g_shopee" class="ganho-in" oninput="calcularLive()"></div>
+                <div class="input-group"><label>Particular</label><input type="number" id="g_part" class="ganho-in" oninput="calcularLive()"></div>
+            </div>
 
-        <button class="btn-save" onclick="salvarTurno()">Salvar e Calcular</button>
+            <div class="live-calc">
+                <div class="live-row"><span>Ganho Bruto:</span> <span id="live-bruto" class="res-bold">R$ 0,00</span></div>
+                <div class="live-row"><span>Custo Estimado:</span> <span id="live-custo" style="color: #e74c3c;">R$ 0,00</span></div>
+                <div class="live-row" style="border-top:1px solid #ccc; padding-top:5px; margin-top:5px;">
+                    <span>LUCRO REAL:</span> <span id="live-lucro" class="res-bold" style="font-size:1.1rem">R$ 0,00</span>
+                </div>
+                <div class="live-row"><span>R$ por KM:</span> <span id="live-rkm" class="res-bold">R$ 0,00</span></div>
+            </div>
+        </div>
+        <button class="btn-save" onclick="salvarTurno()">Salvar Turno</button>
     </div>
 
     <div id="tab-stats" class="hidden">
         <div class="card">
-            <h3>Último Resultado</h3>
-            <div id="resumo-container">
-                <p style="text-align:center; color:#999;">Nenhum dado salvo hoje.</p>
+            <h3>Últimos 7 Lançamentos</h3>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead><tr><th>Data</th><th>KM</th><th>L/KM</th><th>Lucro</th></tr></thead>
+                    <tbody id="lista-historico"></tbody>
+                </table>
             </div>
         </div>
-        
-        <div class="card" id="historico">
-            <h3>Métricas de Eficiência</h3>
-            <div id="metricas-corpo"></div>
+
+        <div class="resumo-semana">
+            <h3 style="color:white; border:none;">Média da Semana (7 dias)</h3>
+            <div id="media-semanal-content"></div>
         </div>
     </div>
 </div>
 
 <nav class="nav-tabs">
-    <div class="tab-item active" onclick="switchTab('launch')">
-        <span>📝 Lançar</span>
-    </div>
-    <div class="tab-item" onclick="switchTab('stats')">
-        <span>📊 Gráficos</span>
-    </div>
+    <div class="tab-item active" onclick="switchTab('launch')"><span>📝 Lançar</span></div>
+    <div class="tab-item" onclick="switchTab('stats')"><span>📊 Histórico</span></div>
 </nav>
 
 <script>
-    function switchTab(tab) {
-        const tLaunch = document.getElementById('tab-launch');
-        const tStats = document.getElementById('tab-stats');
-        const title = document.getElementById('page-title');
-        const items = document.querySelectorAll('.tab-item');
+    // Iniciar data de hoje
+    document.getElementById('data_turno').valueAsDate = new Date();
 
-        if(tab === 'launch') {
-            tLaunch.classList.remove('hidden');
-            tStats.classList.add('hidden');
-            title.innerText = 'Lançamento de Turno';
-            items[0].classList.add('active');
-            items[1].classList.remove('active');
-        } else {
-            tLaunch.classList.add('hidden');
-            tStats.classList.remove('hidden');
-            title.innerText = 'Performance';
-            items[1].classList.add('active');
-            items[0].classList.remove('active');
-            mostrarResultados();
-        }
+    function calcularLive() {
+        const km = parseFloat(document.getElementById('km_rodados').value) || 0;
+        const kml = parseFloat(document.getElementById('km_litro').value) || 0;
+        const gas = parseFloat(document.getElementById('preco_gas').value) || 0;
+        
+        let bruto = 0;
+        document.querySelectorAll('.ganho-in').forEach(input => bruto += parseFloat(input.value) || 0);
+
+        const custo = kml > 0 ? (km / kml) * gas : 0;
+        const lucro = bruto - custo;
+        const rkm = km > 0 ? bruto / km : 0;
+
+        document.getElementById('live-bruto').innerText = `R$ ${bruto.toFixed(2)}`;
+        document.getElementById('live-custo').innerText = `R$ ${custo.toFixed(2)}`;
+        document.getElementById('live-lucro').innerText = `R$ ${lucro.toFixed(2)}`;
+        document.getElementById('live-rkm').innerText = `R$ ${rkm.toFixed(2)}`;
+        
+        return { bruto, custo, lucro, km, kml };
     }
 
     function salvarTurno() {
-        const dados = {
-            km: parseFloat(document.getElementById('km_rodados').value) || 0,
-            consumo: parseFloat(document.getElementById('km_litro').value) || 0,
-            gas: parseFloat(document.getElementById('preco_gas').value) || 0,
-            uber: parseFloat(document.getElementById('ganho_uber').value) || 0,
-            99: parseFloat(document.getElementById('ganho_99').value) || 0,
-            shopee: parseFloat(document.getElementById('ganho_shopee').value) || 0,
-            particular: parseFloat(document.getElementById('ganho_part').value) || 0,
-            data: new Date().toLocaleDateString('pt-BR')
+        const calc = calcularLive();
+        const data = document.getElementById('data_turno').value;
+        
+        if(calc.km <= 0) return alert("Insira os KM rodados");
+
+        const novoRegistro = {
+            data: data,
+            km: calc.km,
+            kml: calc.kml,
+            bruto: calc.bruto,
+            lucro: calc.lucro
         };
 
-        if(dados.km === 0) {
-            alert("Por favor, insira a quilometragem.");
-            return;
-        }
+        let historico = JSON.parse(localStorage.getItem('driver_history') || '[]');
+        // Evita duplicados na mesma data (sobrescreve)
+        historico = historico.filter(item => item.data !== data);
+        historico.unshift(novoRegistro);
+        
+        // Mantém apenas os últimos 14 para não sobrecarregar (exibiremos 7)
+        if(historico.length > 14) historico.pop();
 
-        // Cálculos
-        const custoCombustivel = (dados.km / dados.consumo) * dados.gas;
-        const ganhoBruto = dados.uber + dados['99'] + dados.shopee + dados.particular;
-        const lucroLiquido = ganhoBruto - custoCombustivel;
-        const ganhoPorKm = ganhoBruto / dados.km;
-        const custoPorKm = custoCombustivel / dados.km;
-
-        const resultadoFinal = {
-            ...dados,
-            custoTotal: custoCombustivel,
-            bruto: ganhoBruto,
-            liquido: lucroLiquido,
-            rKm: ganhoPorKm,
-            cKm: custoPorKm
-        };
-
-        localStorage.setItem('ultimo_turno', JSON.stringify(resultadoFinal));
-        alert("Turno salvo com sucesso!");
+        localStorage.setItem('driver_history', JSON.stringify(historico));
+        alert("Dados salvos!");
         switchTab('stats');
     }
 
-    function mostrarResultados() {
-        const raw = localStorage.getItem('ultimo_turno');
-        const container = document.getElementById('resumo-container');
-        const metricas = document.getElementById('metricas-corpo');
+    function renderHistorico() {
+        const historico = JSON.parse(localStorage.getItem('driver_history') || '[]');
+        const tabela = document.getElementById('lista-historico');
+        const resumo = document.getElementById('media-semanal-content');
+        
+        tabela.innerHTML = "";
+        let tKm = 0, tLucro = 0, tKml = 0, cont = 0;
 
-        if(!raw) return;
-        const res = JSON.parse(raw);
+        historico.slice(0, 7).forEach(item => {
+            const dataBr = item.data.split('-').reverse().slice(0,2).join('/');
+            tabela.innerHTML += `<tr>
+                <td>${dataBr}</td>
+                <td>${item.km}</td>
+                <td>${item.kml}</td>
+                <td style="color:var(--primary); font-weight:bold">R$ ${item.lucro.toFixed(2)}</td>
+            </tr>`;
+            tKm += item.km;
+            tLucro += item.lucro;
+            tKml += item.kml;
+            cont++;
+        });
 
-        container.innerHTML = `
-            <div class="stat-row"><span>Ganho Bruto:</span><span class="val">R$ ${res.bruto.toFixed(2)}</span></div>
-            <div class="stat-row"><span>Custo Combustível:</span><span class="val negative">- R$ ${res.custoTotal.toFixed(2)}</span></div>
-            <div class="stat-row"><span>Lucro Real:</span><span class="val" style="font-size:1.2rem">R$ ${res.liquido.toFixed(2)}</span></div>
-        `;
+        if(cont > 0) {
+            resumo.innerHTML = `
+                <div class="live-row"><span>Total KM:</span> <span>${tKm.toFixed(1)} km</span></div>
+                <div class="live-row"><span>Total Lucro:</span> <span>R$ ${tLucro.toFixed(2)}</span></div>
+                <div class="live-row"><span>Média Consumo:</span> <span>${(tKml/cont).toFixed(2)} km/L</span></div>
+                <div class="live-row" style="margin-top:10px; font-weight:bold"><span>Média Diária (Lucro):</span> <span>R$ ${(tLucro/cont).toFixed(2)}</span></div>
+            `;
+        }
+    }
 
-        metricas.innerHTML = `
-            <div class="stat-row"><span>R$ por KM rodado:</span><span class="val">R$ ${res.rKm.toFixed(2)}</span></div>
-            <div class="stat-row"><span>Custo por KM:</span><span class="val negative">R$ ${res.cKm.toFixed(2)}</span></div>
-            <div class="stat-row"><span>Eficiência Líquida:</span><span class="val">R$ ${(res.rKm - res.cKm).toFixed(2)}/km</span></div>
-        `;
+    function switchTab(tab) {
+        document.getElementById('tab-launch').classList.toggle('hidden', tab !== 'launch');
+        document.getElementById('tab-stats').classList.toggle('hidden', tab !== 'stats');
+        document.querySelectorAll('.tab-item').forEach((el, idx) => {
+            el.classList.toggle('active', (tab === 'launch' && idx === 0) || (tab === 'stats' && idx === 1));
+        });
+        if(tab === 'stats') renderHistorico();
     }
 </script>
-
 </body>
 </html>

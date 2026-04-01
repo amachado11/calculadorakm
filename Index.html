@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Driver Intelligence Pro - v5.1</title>
+    <title>Driver Intelligence Pro - v6</title>
     <style>
-        :root { --primary: #27ae60; --dark-green: #1e8449; --secondary: #2c3e50; --bg: #f4f7f6; --white: #ffffff; --danger: #e74c3c; --accent: #3498db; }
+        :root { --primary: #27ae60; --dark-green: #1e8449; --secondary: #2c3e50; --bg: #f4f7f6; --white: #ffffff; --danger: #e74c3c; --accent: #3498db; --gold: #f39c12; }
         body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); margin: 0; padding-bottom: 90px; color: #333; }
         header { background: var(--secondary); color: white; padding: 15px; text-align: center; position: sticky; top: 0; z-index: 100; }
         .container { padding: 12px; max-width: 600px; margin: auto; }
@@ -17,14 +17,11 @@
         label { display: block; font-size: 0.75rem; margin-bottom: 3px; font-weight: 700; color: #7f8c8d; }
         input { width: 100%; padding: 10px; border: 1px solid #dfe6e9; border-radius: 8px; box-sizing: border-box; font-size: 1rem; background: #fafafa; }
         
-        .performance-tag { text-align: center; padding: 8px; border-radius: 6px; font-weight: bold; margin-bottom: 10px; font-size: 0.8rem; text-transform: uppercase; }
-        .perf-pessimo { background: #ffdada; color: var(--danger); }
-        .perf-media { background: #dbe9ff; color: var(--accent); }
-        .perf-excelente { background: #d4edda; color: var(--dark-green); }
-
         .live-calc { background: #f1fcf4; border-left: 5px solid var(--primary); padding: 12px; border-radius: 8px; }
+        .plan-calc { background: #fff9eb; border-left: 5px solid var(--gold); padding: 12px; border-radius: 8px; }
         .live-row { display: flex; justify-content: space-between; font-size: 0.9rem; margin: 5px 0; }
         .res-bold { font-weight: 800; color: var(--primary); }
+        .res-plan { font-weight: 800; color: var(--secondary); }
 
         .chart-container { margin: 15px 0; background: #eee; height: 25px; border-radius: 5px; display: flex; overflow: hidden; border: 1px solid #444; }
         .chart-lucro { background: var(--primary); height: 100%; transition: 0.5s; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: white; font-weight: bold; }
@@ -35,10 +32,10 @@
         
         table { width: 100%; border-collapse: collapse; font-size: 0.8rem; background: white; }
         th { background: #f8f9fa; padding: 10px; text-align: left; border-bottom: 2px solid #eee; }
-        td { padding: 10px; border-bottom: 1px solid #eee; vertical-align: middle; }
+        td { padding: 10px; border-bottom: 1px solid #eee; }
         
         .nav-tabs { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; height: 70px; }
-        .tab-item { flex: 1; display: flex; align-items: center; justify-content: center; flex-direction: column; font-size: 0.75rem; color: #bdc3c7; }
+        .tab-item { flex: 1; display: flex; align-items: center; justify-content: center; flex-direction: column; font-size: 0.7rem; color: #bdc3c7; }
         .tab-item.active { color: var(--primary); font-weight: bold; }
         .hidden { display: none; }
     </style>
@@ -48,6 +45,7 @@
 <header><h2 id="page-title" style="margin:0; font-size: 1.2rem;">Lançamento</h2></header>
 
 <div class="container">
+    
     <div id="tab-launch">
         <div class="card">
             <div class="grid-inputs">
@@ -72,30 +70,46 @@
                 <div class="input-group"><label>SHOPEE</label><input type="number" id="g_shopee" class="ganho-in" oninput="calcularLive()"></div>
                 <div class="input-group"><label>PARTICULAR</label><input type="number" id="g_part" class="ganho-in" oninput="calcularLive()"></div>
             </div>
-            <input type="hidden" id="edit_id"> <div id="status-comentario"></div>
+            <input type="hidden" id="edit_id">
             <div class="live-calc" id="painel-resultados"></div>
         </div>
         <button class="btn btn-save" id="btn-main-save" onclick="salvarTurno()">SALVAR LANÇAMENTO</button>
     </div>
 
+    <div id="tab-plan" class="hidden">
+        <div class="card">
+            <h3>Meta do Dia</h3>
+            <div class="input-group"><label>QUANTO QUERO GANHAR LIMPO? (R$)</label><input type="number" id="p_meta" value="200" oninput="calcularPlano()"></div>
+            <div class="grid-inputs">
+                <div class="input-group"><label>CONSUMO KM/L</label><input type="number" id="p_kml" value="11.5" oninput="calcularPlano()"></div>
+                <div class="input-group"><label>PREÇO GASOLINA</label><input type="number" id="p_gas" value="6.35" oninput="calcularPlano()"></div>
+            </div>
+            <div class="input-group"><label>EXPECTATIVA R$ POR KM (BRUTO)</label><input type="number" id="p_rkm" value="2.20" oninput="calcularPlano()"></div>
+        </div>
+
+        <div class="card plan-calc">
+            <h3>Estimativa de Trabalho</h3>
+            <div id="resumo-plano"></div>
+        </div>
+        <p style="font-size: 0.75rem; color: #7f8c8d; text-align: center; padding: 10px;">
+            *Cálculo baseado na sua eficiência média e custos operacionais.
+        </p>
+    </div>
+
     <div id="tab-stats" class="hidden">
         <div class="card">
-            <h3>Período</h3>
             <div style="display:flex; gap:5px;">
                 <input type="date" id="filtro_inicio" style="flex:1">
                 <input type="date" id="filtro_fim" style="flex:1">
-                <button onclick="renderHistorico()" style="padding:10px; border-radius:8px; border:none; background:var(--primary); color:white;">OK</button>
+                <button onclick="renderHistorico()" style="padding:10px; border:none; background:var(--primary); color:white; border-radius:8px;">OK</button>
             </div>
         </div>
-
         <div class="card" style="background:var(--secondary); color:white;">
-            <h3 style="color:white; border-color:#444;">Saúde Financeira</h3>
             <div id="resumo-periodo-content"></div>
         </div>
-
         <div class="card" style="padding:0; overflow-x:auto;">
             <table>
-                <thead><tr><th>Data</th><th>Lucro</th><th>R$/H</th><th>Ação</th></tr></thead>
+                <thead><tr><th>Data</th><th>Lucro</th><th>R$/H</th><th>Ações</th></tr></thead>
                 <tbody id="lista-historico"></tbody>
             </table>
         </div>
@@ -104,6 +118,7 @@
 
 <nav class="nav-tabs">
     <div class="tab-item active" onclick="switchTab('launch')"><span>📝 Lançar</span></div>
+    <div class="tab-item" onclick="switchTab('plan')"><span>🧮 Planejar</span></div>
     <div class="tab-item" onclick="switchTab('stats')"><span>📊 Relatórios</span></div>
 </nav>
 
@@ -112,68 +127,58 @@
     document.getElementById('filtro_inicio').valueAsDate = new Date();
     document.getElementById('filtro_fim').valueAsDate = new Date();
 
-    const formatNum = (id) => {
-        let val = document.getElementById(id).value.toString().trim().replace(',', '.');
-        return parseFloat(val) || 0;
-    };
+    const getVal = (id) => parseFloat(document.getElementById(id).value.replace(',', '.')) || 0;
 
     function calcularLive() {
-        const km = formatNum('km_rodados');
-        const kml = formatNum('km_litro');
-        const gas = formatNum('preco_gas');
-        const horas = formatNum('horas_online');
-        
+        const km = getVal('km_rodados'), kml = getVal('km_litro'), gas = getVal('preco_gas'), horas = getVal('horas_online');
         let bruto = 0;
-        document.querySelectorAll('.ganho-in').forEach(input => {
-            bruto += parseFloat(input.value.toString().replace(',', '.')) || 0;
-        });
-
+        document.querySelectorAll('.ganho-in').forEach(i => bruto += parseFloat(i.value.replace(',', '.')) || 0);
         const custo = kml > 0 ? (km / kml) * gas : 0;
         const lucro = bruto - custo;
         const rhora = horas > 0 ? lucro / horas : 0;
-        const rkm = km > 0 ? bruto / km : 0;
-
-        const divStatus = document.getElementById('status-comentario');
-        if (rhora > 0) {
-            let statusTxt = rhora >= 35 ? "Excelente: Acima da Média! 🚀" : (rhora < 30 ? "Péssimo: Pagou para trabalhar 🛑" : "Na Média 🆗");
-            let statusClass = rhora >= 35 ? "perf-excelente" : (rhora < 30 ? "perf-pessimo" : "perf-media");
-            divStatus.innerHTML = `<div class="performance-tag ${statusClass}">${statusTxt}</div>`;
-        } else { divStatus.innerHTML = ""; }
-
         document.getElementById('painel-resultados').innerHTML = `
             <div class="live-row"><span>LUCRO LÍQUIDO:</span> <span class="res-bold">R$ ${lucro.toFixed(2)}</span></div>
             <div class="live-row"><span>R$ POR HORA:</span> <span class="res-bold">R$ ${rhora.toFixed(2)}/h</span></div>
-            <div class="live-row"><span>R$ POR KM:</span> <span class="res-bold">R$ ${rkm.toFixed(2)}/km</span></div>
         `;
+        return { bruto, custo, lucro, km, kml, gas, horas, rhora, g_uber:getVal('g_uber'), g_99:getVal('g_99'), g_shopee:getVal('g_shopee'), g_part:getVal('g_part') };
+    }
+
+    function calcularPlano() {
+        const meta = getVal('p_meta'), kml = getVal('p_kml'), gas = getVal('p_gas'), rkmExpect = getVal('p_rkm');
         
-        return { bruto, custo, lucro, km, kml, gas, horas, rhora, rkm, 
-                 g_uber: formatNum('g_uber'), g_99: formatNum('g_99'), 
-                 g_shopee: formatNum('g_shopee'), g_part: formatNum('g_part') };
+        // Regra de 3: Bruto = Meta + Custo. Custo = (KM * Gas) / KML. Bruto = KM * RKM_Expect.
+        // KM = Meta / (RKM_Expect - (Gas/KML))
+        const custoPorKm = kml > 0 ? gas / kml : 0;
+        const kmNecessario = rkmExpect > custoPorKm ? meta / (rkmExpect - custoPorKm) : 0;
+        const faturamentoBruto = kmNecessario * rkmExpect;
+        const totalCusto = kmNecessario * custoPorKm;
+        
+        // Estimativa de horas baseada em R$ 35,00/h (Sua média)
+        const horasEst = meta / 35;
+
+        document.getElementById('resumo-plano').innerHTML = `
+            <div class="live-row"><span>FATURAMENTO ALVO:</span> <span class="res-plan" style="color:var(--gold)">R$ ${faturamentoBruto.toFixed(2)}</span></div>
+            <div class="live-row"><span>KM ESTIMADO:</span> <span class="res-plan">${kmNecessario.toFixed(0)} km</span></div>
+            <div class="live-row"><span>TEMPO ESTIMADO:</span> <span class="res-plan">${horasEst.toFixed(1)} h</span></div>
+            <hr style="border:0; border-top:1px solid #ddd; margin:10px 0;">
+            <div class="live-row" style="font-size:0.8rem"><span>Custo Combustível:</span> <span>R$ ${totalCusto.toFixed(2)}</span></div>
+        `;
     }
 
     function salvarTurno() {
         const calc = calcularLive();
-        if(calc.km <= 0 && calc.bruto <= 0) return alert("Preencha os dados do turno.");
-        
+        if(calc.km <= 0 && calc.bruto <= 0) return alert("Preencha os dados.");
         const data = document.getElementById('data_turno').value;
         const editId = document.getElementById('edit_id').value;
-        
-        let historico = JSON.parse(localStorage.getItem('driver_history_v4') || '[]');
-        
+        let hist = JSON.parse(localStorage.getItem('driver_history_v4') || '[]');
         if (editId) {
-            // Se for edição, substitui o registro existente
-            const index = historico.findIndex(i => (i.id ? i.id.toString() : i.data) === editId);
-            if (index !== -1) {
-                historico[index] = { ...calc, data, id: editId };
-            }
+            const idx = hist.findIndex(i => (i.id ? i.id.toString() : i.data) === editId);
+            if (idx !== -1) hist[idx] = { ...calc, data, id: editId };
         } else {
-            // Se for novo, adiciona com novo ID
-            const registro = { ...calc, data, id: Date.now() };
-            historico.push(registro);
+            hist.push({ ...calc, data, id: Date.now() });
         }
-        
-        localStorage.setItem('driver_history_v4', JSON.stringify(historico));
-        alert(editId ? "Lançamento atualizado!" : "Lançamento salvo!");
+        localStorage.setItem('driver_history_v4', JSON.stringify(hist));
+        alert("Salvo!");
         limparCampos();
         switchTab('stats');
     }
@@ -181,99 +186,80 @@
     function limparCampos() {
         document.getElementById('edit_id').value = "";
         document.getElementById('btn-main-save').innerText = "SALVAR LANÇAMENTO";
-        document.querySelectorAll('input[type="number"]').forEach(i => { 
+        document.querySelectorAll('#tab-launch input[type="number"]').forEach(i => { 
             if(!['meta_dia', 'km_litro', 'preco_gas'].includes(i.id)) i.value = ""; 
         });
         calcularLive();
     }
 
     function renderHistorico() {
-        let historico = JSON.parse(localStorage.getItem('driver_history_v4') || '[]');
-        const inicio = document.getElementById('filtro_inicio').value;
-        const fim = document.getElementById('filtro_fim').value;
+        let hist = JSON.parse(localStorage.getItem('driver_history_v4') || '[]');
+        const inicio = document.getElementById('filtro_inicio').value, fim = document.getElementById('filtro_fim').value;
+        hist = hist.filter(i => i.data >= inicio && i.data <= fim);
+        hist.sort((a,b) => b.data.localeCompare(a.data) || (b.id || 0) - (a.id || 0));
         
-        historico = historico.filter(i => i.data >= inicio && i.data <= fim);
-        historico.sort((a,b) => b.data.localeCompare(a.data) || (b.id || 0) - (a.id || 0));
-
         const tabela = document.getElementById('lista-historico');
-        const resumo = document.getElementById('resumo-periodo-content');
         tabela.innerHTML = "";
-        
-        let tLucro = 0, tBruto = 0, tCusto = 0, tHoras = 0, maxLucro = 0;
+        let tL = 0, tB = 0, tC = 0, tH = 0;
 
-        historico.forEach(item => {
-            const dataExib = item.data.split('-').reverse().slice(0,2).join('/');
-            const itemId = item.id ? item.id.toString() : item.data;
-            
+        hist.forEach(item => {
+            const id = item.id ? item.id.toString() : item.data;
             tabela.innerHTML += `<tr>
-                <td>${dataExib}</td>
+                <td>${item.data.split('-').reverse().slice(0,2).join('/')}</td>
                 <td style="color:var(--primary); font-weight:bold">R$ ${item.lucro.toFixed(2)}</td>
                 <td>R$ ${item.rhora.toFixed(2)}/h</td>
-                <td style="white-space: nowrap;">
-                    <button style="color:var(--accent); background:none; border:none; font-size:1.1rem; padding:5px" onclick="editar('${itemId}')">✎</button>
-                    <button style="color:var(--danger); background:none; border:none; font-size:1.1rem; padding:5px" onclick="deletar('${itemId}')">✕</button>
+                <td>
+                    <button style="color:var(--accent); border:none; background:none;" onclick="editar('${id}')">✎</button>
+                    <button style="color:var(--danger); border:none; background:none;" onclick="deletar('${id}')">✕</button>
                 </td>
             </tr>`;
-            tLucro += item.lucro; tBruto += item.bruto; tCusto += item.custo; tHoras += item.horas;
-            if(item.lucro > maxLucro) maxLucro = item.lucro;
+            tL += item.lucro; tB += item.bruto; tC += item.custo; tH += item.horas;
         });
 
-        const pLucro = tBruto > 0 ? (tLucro / tBruto) * 100 : 0;
-        const pCusto = tBruto > 0 ? (tCusto / tBruto) * 100 : 0;
-
-        resumo.innerHTML = `
-            <div class="live-row"><span>LUCRO TOTAL:</span> <span style="font-weight:bold">R$ ${tLucro.toFixed(2)}</span></div>
-            <div class="live-row"><span>LÍQUIDO MÁXIMO:</span> <span style="font-weight:bold">R$ ${maxLucro.toFixed(2)}</span></div>
-            <div class="live-row"><span>MÉDIA LÍQ/HORA:</span> <span style="font-weight:bold">R$ ${(tLucro/tHoras || 0).toFixed(2)}/h</span></div>
-            
-            <p style="font-size:0.7rem; margin-bottom:5px; margin-top:15px; opacity:0.9">EFICIÊNCIA (LUCRO vs CUSTO):</p>
+        const pL = tB > 0 ? (tL / tB) * 100 : 0, pC = tB > 0 ? (tC / tB) * 100 : 0;
+        document.getElementById('resumo-periodo-content').innerHTML = `
+            <div class="live-row"><span>LUCRO TOTAL:</span> <b>R$ ${tL.toFixed(2)}</b></div>
+            <div class="live-row"><span>MÉDIA LÍQ/H:</span> <b>R$ ${(tL/tH || 0).toFixed(2)}/h</b></div>
             <div class="chart-container">
-                <div class="chart-lucro" style="width:${pLucro}%">${pLucro.toFixed(0)}%</div>
-                <div class="chart-custo" style="width:${pCusto}%">${pCusto.toFixed(0)}%</div>
+                <div class="chart-lucro" style="width:${pL}%">${pL.toFixed(0)}%</div>
+                <div class="chart-custo" style="width:${pC}%">${pC.toFixed(0)}%</div>
             </div>
         `;
     }
 
     function editar(id) {
-        let historico = JSON.parse(localStorage.getItem('driver_history_v4') || '[]');
-        const item = historico.find(i => (i.id ? i.id.toString() : i.data) === id);
-        
+        let hist = JSON.parse(localStorage.getItem('driver_history_v4') || '[]');
+        const item = hist.find(i => (i.id ? i.id.toString() : i.data) === id);
         if (item) {
             document.getElementById('data_turno').value = item.data;
             document.getElementById('km_rodados').value = item.km;
-            document.getElementById('km_litro').value = item.kml;
-            document.getElementById('preco_gas').value = item.gas;
             document.getElementById('horas_online').value = item.horas;
             document.getElementById('g_uber').value = item.g_uber;
             document.getElementById('g_99').value = item.g_99;
             document.getElementById('g_shopee').value = item.g_shopee;
             document.getElementById('g_part').value = item.g_part;
-            
             document.getElementById('edit_id').value = id;
-            document.getElementById('btn-main-save').innerText = "ATUALIZAR LANÇAMENTO";
-            
+            document.getElementById('btn-main-save').innerText = "ATUALIZAR";
             switchTab('launch');
             calcularLive();
         }
     }
 
     function deletar(id) {
-        if(!confirm("Excluir este lançamento?")) return;
-        let hist = JSON.parse(localStorage.getItem('driver_history_v4'));
-        hist = hist.filter(i => (i.id ? i.id.toString() : i.data) !== id.toString());
+        if(!confirm("Excluir?")) return;
+        let hist = JSON.parse(localStorage.getItem('driver_history_v4')).filter(i => (i.id ? i.id.toString() : i.data) !== id.toString());
         localStorage.setItem('driver_history_v4', JSON.stringify(hist));
         renderHistorico();
     }
 
     function switchTab(tab) {
         document.getElementById('tab-launch').classList.toggle('hidden', tab !== 'launch');
+        document.getElementById('tab-plan').classList.toggle('hidden', tab !== 'plan');
         document.getElementById('tab-stats').classList.toggle('hidden', tab !== 'stats');
-        document.querySelectorAll('.tab-item').forEach((el, idx) => {
-            el.classList.toggle('active', (tab === 'launch' && idx === 0) || (tab === 'stats' && idx === 1));
-        });
+        document.querySelectorAll('.tab-item').forEach((el, i) => el.classList.toggle('active', (tab==='launch'&&i===0) || (tab==='plan'&&i===1) || (tab==='stats'&&i===2)));
         if(tab === 'stats') renderHistorico();
-        document.getElementById('page-title').innerText = tab === 'launch' ? 'Lançamento' : 'Relatórios';
-        if(tab === 'launch' && !document.getElementById('edit_id').value) limparCampos();
+        if(tab === 'plan') calcularPlano();
+        document.getElementById('page-title').innerText = tab==='launch'?'Lançamento':tab==='plan'?'Planejar':'Relatórios';
     }
 
     renderHistorico();

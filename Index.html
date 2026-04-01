@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Driver Intelligence Pro - v5</title>
+    <title>Driver Intelligence Pro - v5.1</title>
     <style>
         :root { --primary: #27ae60; --dark-green: #1e8449; --secondary: #2c3e50; --bg: #f4f7f6; --white: #ffffff; --danger: #e74c3c; --accent: #3498db; }
         body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); margin: 0; padding-bottom: 90px; color: #333; }
@@ -26,7 +26,6 @@
         .live-row { display: flex; justify-content: space-between; font-size: 0.9rem; margin: 5px 0; }
         .res-bold { font-weight: 800; color: var(--primary); }
 
-        /* Estilo do Gráfico de Barra */
         .chart-container { margin: 15px 0; background: #eee; height: 25px; border-radius: 5px; display: flex; overflow: hidden; border: 1px solid #444; }
         .chart-lucro { background: var(--primary); height: 100%; transition: 0.5s; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: white; font-weight: bold; }
         .chart-custo { background: var(--danger); height: 100%; transition: 0.5s; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: white; font-weight: bold; }
@@ -36,7 +35,7 @@
         
         table { width: 100%; border-collapse: collapse; font-size: 0.8rem; background: white; }
         th { background: #f8f9fa; padding: 10px; text-align: left; border-bottom: 2px solid #eee; }
-        td { padding: 10px; border-bottom: 1px solid #eee; }
+        td { padding: 10px; border-bottom: 1px solid #eee; vertical-align: middle; }
         
         .nav-tabs { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; height: 70px; }
         .tab-item { flex: 1; display: flex; align-items: center; justify-content: center; flex-direction: column; font-size: 0.75rem; color: #bdc3c7; }
@@ -73,9 +72,7 @@
                 <div class="input-group"><label>SHOPEE</label><input type="number" id="g_shopee" class="ganho-in" oninput="calcularLive()"></div>
                 <div class="input-group"><label>PARTICULAR</label><input type="number" id="g_part" class="ganho-in" oninput="calcularLive()"></div>
             </div>
-
-            <div id="status-comentario"></div>
-
+            <input type="hidden" id="edit_id"> <div id="status-comentario"></div>
             <div class="live-calc" id="painel-resultados"></div>
         </div>
         <button class="btn btn-save" id="btn-main-save" onclick="salvarTurno()">SALVAR LANÇAMENTO</button>
@@ -141,7 +138,7 @@
             let statusTxt = rhora >= 35 ? "Excelente: Acima da Média! 🚀" : (rhora < 30 ? "Péssimo: Pagou para trabalhar 🛑" : "Na Média 🆗");
             let statusClass = rhora >= 35 ? "perf-excelente" : (rhora < 30 ? "perf-pessimo" : "perf-media");
             divStatus.innerHTML = `<div class="performance-tag ${statusClass}">${statusTxt}</div>`;
-        }
+        } else { divStatus.innerHTML = ""; }
 
         document.getElementById('painel-resultados').innerHTML = `
             <div class="live-row"><span>LUCRO LÍQUIDO:</span> <span class="res-bold">R$ ${lucro.toFixed(2)}</span></div>
@@ -150,7 +147,6 @@
         `;
         
         return { bruto, custo, lucro, km, kml, gas, horas, rhora, rkm, 
-                 id: Date.now(), // Gera ID único baseado no tempo
                  g_uber: formatNum('g_uber'), g_99: formatNum('g_99'), 
                  g_shopee: formatNum('g_shopee'), g_part: formatNum('g_part') };
     }
@@ -160,21 +156,34 @@
         if(calc.km <= 0 && calc.bruto <= 0) return alert("Preencha os dados do turno.");
         
         const data = document.getElementById('data_turno').value;
-        const registro = { ...calc, data };
+        const editId = document.getElementById('edit_id').value;
         
         let historico = JSON.parse(localStorage.getItem('driver_history_v4') || '[]');
         
-        // Verifica se o registro antigo não tinha ID (dados antigos) e tenta não duplicar
-        historico.push(registro);
+        if (editId) {
+            // Se for edição, substitui o registro existente
+            const index = historico.findIndex(i => (i.id ? i.id.toString() : i.data) === editId);
+            if (index !== -1) {
+                historico[index] = { ...calc, data, id: editId };
+            }
+        } else {
+            // Se for novo, adiciona com novo ID
+            const registro = { ...calc, data, id: Date.now() };
+            historico.push(registro);
+        }
         
         localStorage.setItem('driver_history_v4', JSON.stringify(historico));
-        alert("Lançamento salvo com sucesso!");
+        alert(editId ? "Lançamento atualizado!" : "Lançamento salvo!");
         limparCampos();
         switchTab('stats');
     }
 
     function limparCampos() {
-        document.querySelectorAll('input[type="number"]').forEach(i => { if(i.id !== 'meta_dia' && i.id !== 'km_litro' && i.id !== 'preco_gas') i.value = ""; });
+        document.getElementById('edit_id').value = "";
+        document.getElementById('btn-main-save').innerText = "SALVAR LANÇAMENTO";
+        document.querySelectorAll('input[type="number"]').forEach(i => { 
+            if(!['meta_dia', 'km_litro', 'preco_gas'].includes(i.id)) i.value = ""; 
+        });
         calcularLive();
     }
 
@@ -184,22 +193,26 @@
         const fim = document.getElementById('filtro_fim').value;
         
         historico = historico.filter(i => i.data >= inicio && i.data <= fim);
-        historico.sort((a,b) => b.data.localeCompare(a.data) || b.id - a.id);
+        historico.sort((a,b) => b.data.localeCompare(a.data) || (b.id || 0) - (a.id || 0));
 
         const tabela = document.getElementById('lista-historico');
         const resumo = document.getElementById('resumo-periodo-content');
         tabela.innerHTML = "";
         
-        let tLucro = 0, tBruto = 0, tCusto = 0, tHoras = 0;
-        let maxLucro = 0;
+        let tLucro = 0, tBruto = 0, tCusto = 0, tHoras = 0, maxLucro = 0;
 
         historico.forEach(item => {
             const dataExib = item.data.split('-').reverse().slice(0,2).join('/');
+            const itemId = item.id ? item.id.toString() : item.data;
+            
             tabela.innerHTML += `<tr>
                 <td>${dataExib}</td>
                 <td style="color:var(--primary); font-weight:bold">R$ ${item.lucro.toFixed(2)}</td>
                 <td>R$ ${item.rhora.toFixed(2)}/h</td>
-                <td><button style="color:var(--danger); background:none; border:none;" onclick="deletar('${item.id || item.data}')">✕</button></td>
+                <td style="white-space: nowrap;">
+                    <button style="color:var(--accent); background:none; border:none; font-size:1.1rem; padding:5px" onclick="editar('${itemId}')">✎</button>
+                    <button style="color:var(--danger); background:none; border:none; font-size:1.1rem; padding:5px" onclick="deletar('${itemId}')">✕</button>
+                </td>
             </tr>`;
             tLucro += item.lucro; tBruto += item.bruto; tCusto += item.custo; tHoras += item.horas;
             if(item.lucro > maxLucro) maxLucro = item.lucro;
@@ -218,17 +231,35 @@
                 <div class="chart-lucro" style="width:${pLucro}%">${pLucro.toFixed(0)}%</div>
                 <div class="chart-custo" style="width:${pCusto}%">${pCusto.toFixed(0)}%</div>
             </div>
-            <div style="display:flex; justify-content:space-between; font-size:0.6rem; opacity:0.8">
-                <span>LUCRO LÍQUIDO</span>
-                <span>CUSTO OPERACIONAL</span>
-            </div>
         `;
+    }
+
+    function editar(id) {
+        let historico = JSON.parse(localStorage.getItem('driver_history_v4') || '[]');
+        const item = historico.find(i => (i.id ? i.id.toString() : i.data) === id);
+        
+        if (item) {
+            document.getElementById('data_turno').value = item.data;
+            document.getElementById('km_rodados').value = item.km;
+            document.getElementById('km_litro').value = item.kml;
+            document.getElementById('preco_gas').value = item.gas;
+            document.getElementById('horas_online').value = item.horas;
+            document.getElementById('g_uber').value = item.g_uber;
+            document.getElementById('g_99').value = item.g_99;
+            document.getElementById('g_shopee').value = item.g_shopee;
+            document.getElementById('g_part').value = item.g_part;
+            
+            document.getElementById('edit_id').value = id;
+            document.getElementById('btn-main-save').innerText = "ATUALIZAR LANÇAMENTO";
+            
+            switchTab('launch');
+            calcularLive();
+        }
     }
 
     function deletar(id) {
         if(!confirm("Excluir este lançamento?")) return;
         let hist = JSON.parse(localStorage.getItem('driver_history_v4'));
-        // Deleta por ID ou por data (para manter compatibilidade com dados antigos)
         hist = hist.filter(i => (i.id ? i.id.toString() : i.data) !== id.toString());
         localStorage.setItem('driver_history_v4', JSON.stringify(hist));
         renderHistorico();
@@ -242,6 +273,7 @@
         });
         if(tab === 'stats') renderHistorico();
         document.getElementById('page-title').innerText = tab === 'launch' ? 'Lançamento' : 'Relatórios';
+        if(tab === 'launch' && !document.getElementById('edit_id').value) limparCampos();
     }
 
     renderHistorico();

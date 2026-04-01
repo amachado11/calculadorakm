@@ -3,40 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Driver Intelligence Pro - Performance</title>
+    <title>Driver Intelligence Pro - v5</title>
     <style>
-        :root { --primary: #27ae60; --dark-green: #1e8449; --secondary: #2c3e50; --bg: #f4f7f6; --white: #ffffff; --danger: #e74c3c; --accent: #3498db; --warning: #f39c12; }
+        :root { --primary: #27ae60; --dark-green: #1e8449; --secondary: #2c3e50; --bg: #f4f7f6; --white: #ffffff; --danger: #e74c3c; --accent: #3498db; }
         body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); margin: 0; padding-bottom: 90px; color: #333; }
         header { background: var(--secondary); color: white; padding: 15px; text-align: center; position: sticky; top: 0; z-index: 100; }
         .container { padding: 12px; max-width: 600px; margin: auto; }
         .card { background: var(--white); padding: 15px; border-radius: 12px; margin-bottom: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        h3 { margin: 0 0 12px 0; font-size: 1rem; color: var(--secondary); border-bottom: 1px solid #eee; padding-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        h3 { margin: 0 0 12px 0; font-size: 1rem; color: var(--secondary); border-bottom: 1px solid #eee; padding-bottom: 5px; text-transform: uppercase; }
         
         .grid-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .input-group { margin-bottom: 10px; }
         label { display: block; font-size: 0.75rem; margin-bottom: 3px; font-weight: 700; color: #7f8c8d; }
         input { width: 100%; padding: 10px; border: 1px solid #dfe6e9; border-radius: 8px; box-sizing: border-box; font-size: 1rem; background: #fafafa; }
         
-        .live-calc { background: #f1fcf4; border-left: 5px solid var(--primary); padding: 12px; border-radius: 8px; margin-top: 5px; }
-        .live-row { display: flex; justify-content: space-between; font-size: 0.9rem; margin: 5px 0; }
-        .res-bold { font-weight: 800; color: var(--primary); }
-        .res-danger { font-weight: 800; color: var(--danger); }
-
-        .performance-tag { text-align: center; padding: 8px; border-radius: 6px; font-weight: bold; margin-bottom: 10px; font-size: 0.9rem; text-transform: uppercase; }
+        .performance-tag { text-align: center; padding: 8px; border-radius: 6px; font-weight: bold; margin-bottom: 10px; font-size: 0.8rem; text-transform: uppercase; }
         .perf-pessimo { background: #ffdada; color: var(--danger); }
         .perf-media { background: #dbe9ff; color: var(--accent); }
         .perf-excelente { background: #d4edda; color: var(--dark-green); }
 
-        .btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; transition: 0.2s; margin-top: 5px; }
+        .live-calc { background: #f1fcf4; border-left: 5px solid var(--primary); padding: 12px; border-radius: 8px; }
+        .live-row { display: flex; justify-content: space-between; font-size: 0.9rem; margin: 5px 0; }
+        .res-bold { font-weight: 800; color: var(--primary); }
+
+        /* Estilo do Gráfico de Barra */
+        .chart-container { margin: 15px 0; background: #eee; height: 25px; border-radius: 5px; display: flex; overflow: hidden; border: 1px solid #444; }
+        .chart-lucro { background: var(--primary); height: 100%; transition: 0.5s; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: white; font-weight: bold; }
+        .chart-custo { background: var(--danger); height: 100%; transition: 0.5s; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: white; font-weight: bold; }
+
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 5px; }
         .btn-save { background: var(--primary); color: white; }
-        .btn-export { background: var(--accent); color: white; margin-top: 15px; }
         
-        .badge { background: #eee; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; color: #7f8c8d; }
-        .badge-success { background: var(--primary); color: white; font-weight: bold; }
-        .badge-over { background: var(--dark-green); color: white; font-weight: bold; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.8rem; background: white; }
+        th { background: #f8f9fa; padding: 10px; text-align: left; border-bottom: 2px solid #eee; }
+        td { padding: 10px; border-bottom: 1px solid #eee; }
         
-        .nav-tabs { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; height: 70px; z-index: 1000; }
-        .tab-item { flex: 1; display: flex; align-items: center; justify-content: center; flex-direction: column; font-size: 0.75rem; color: #bdc3c7; cursor: pointer; }
+        .nav-tabs { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; height: 70px; }
+        .tab-item { flex: 1; display: flex; align-items: center; justify-content: center; flex-direction: column; font-size: 0.75rem; color: #bdc3c7; }
         .tab-item.active { color: var(--primary); font-weight: bold; }
         .hidden { display: none; }
     </style>
@@ -50,56 +53,54 @@
         <div class="card">
             <div class="grid-inputs">
                 <div class="input-group"><label>DATA</label><input type="date" id="data_turno"></div>
-                <div class="input-group"><label>META DIA (LÍQUIDA R$)</label><input type="number" id="meta_dia" value="150" oninput="calcularLive()"></div>
+                <div class="input-group"><label>META LÍQUIDA (R$)</label><input type="number" id="meta_dia" value="150" oninput="calcularLive()"></div>
             </div>
             <div class="grid-inputs">
-                <div class="input-group"><label>KM RODADOS</label><input type="number" id="km_rodados" placeholder="Ex: 89" oninput="calcularLive()"></div>
-                <div class="input-group"><label>HORAS ONLINE</label><input type="number" step="0.1" id="horas_online" placeholder="Ex: 3" oninput="calcularLive()"></div>
+                <div class="input-group"><label>KM RODADOS</label><input type="number" id="km_rodados" oninput="calcularLive()"></div>
+                <div class="input-group"><label>HORAS ONLINE</label><input type="number" step="0.1" id="horas_online" oninput="calcularLive()"></div>
             </div>
             <div class="grid-inputs">
-                <div class="input-group"><label>MÉDIA KM/L</label><input type="number" id="km_litro" placeholder="Ex: 11,5" oninput="calcularLive()"></div>
-                <div class="input-group"><label>GASOLINA (R$)</label><input type="number" id="preco_gas" step="0.01" placeholder="Ex: 6,35" oninput="calcularLive()"></div>
+                <div class="input-group"><label>MÉDIA KM/L</label><input type="number" id="km_litro" value="11.5" oninput="calcularLive()"></div>
+                <div class="input-group"><label>GASOLINA (R$)</label><input type="number" id="preco_gas" step="0.01" value="6.35" oninput="calcularLive()"></div>
             </div>
         </div>
 
         <div class="card">
-            <h3>Ganhos por App</h3>
+            <h3>Ganhos do Turno</h3>
             <div class="grid-inputs">
-                <div class="input-group"><label>UBER</label><input type="number" id="g_uber" class="ganho-in" placeholder="0" oninput="calcularLive()"></div>
-                <div class="input-group"><label>99</label><input type="number" id="g_99" class="ganho-in" placeholder="0" oninput="calcularLive()"></div>
-                <div class="input-group"><label>SHOPEE</label><input type="number" id="g_shopee" class="ganho-in" placeholder="0" oninput="calcularLive()"></div>
-                <div class="input-group"><label>PARTICULAR</label><input type="number" id="g_part" class="ganho-in" placeholder="0" oninput="calcularLive()"></div>
+                <div class="input-group"><label>UBER</label><input type="number" id="g_uber" class="ganho-in" oninput="calcularLive()"></div>
+                <div class="input-group"><label>99</label><input type="number" id="g_99" class="ganho-in" oninput="calcularLive()"></div>
+                <div class="input-group"><label>SHOPEE</label><input type="number" id="g_shopee" class="ganho-in" oninput="calcularLive()"></div>
+                <div class="input-group"><label>PARTICULAR</label><input type="number" id="g_part" class="ganho-in" oninput="calcularLive()"></div>
             </div>
 
             <div id="status-comentario"></div>
 
-            <div class="live-calc" id="painel-resultados">
-                </div>
+            <div class="live-calc" id="painel-resultados"></div>
         </div>
-        <button class="btn btn-save" id="btn-main-save" onclick="salvarTurno()">SALVAR TURNO</button>
+        <button class="btn btn-save" id="btn-main-save" onclick="salvarTurno()">SALVAR LANÇAMENTO</button>
     </div>
 
     <div id="tab-stats" class="hidden">
         <div class="card">
-            <h3>Filtrar Período</h3>
-            <div class="filter-area">
-                <div style="flex:1"><label>DE:</label><input type="date" id="filtro_inicio"></div>
-                <div style="flex:1"><label>ATÉ:</label><input type="date" id="filtro_fim"></div>
-                <button class="btn btn-save" style="width:45px; padding:10px; margin:0;" onclick="renderHistorico()">ok</button>
+            <h3>Período</h3>
+            <div style="display:flex; gap:5px;">
+                <input type="date" id="filtro_inicio" style="flex:1">
+                <input type="date" id="filtro_fim" style="flex:1">
+                <button onclick="renderHistorico()" style="padding:10px; border-radius:8px; border:none; background:var(--primary); color:white;">OK</button>
             </div>
         </div>
 
-        <div class="card" style="padding:0; overflow:hidden;">
-            <table>
-                <thead><tr><th>Data</th><th>Lucro (R$)</th><th>R$/H (Líq)</th><th>Ação</th></tr></thead>
-                <tbody id="lista-historico"></tbody>
-            </table>
+        <div class="card" style="background:var(--secondary); color:white;">
+            <h3 style="color:white; border-color:#444;">Saúde Financeira</h3>
+            <div id="resumo-periodo-content"></div>
         </div>
 
-        <div class="card" style="background:var(--secondary); color:white;">
-            <h3 style="color:white; border-color:#444;">Inteligência do Período</h3>
-            <div id="resumo-periodo-content"></div>
-            <button class="btn btn-export" onclick="exportarDados()">Exportar Relatório</button>
+        <div class="card" style="padding:0; overflow-x:auto;">
+            <table>
+                <thead><tr><th>Data</th><th>Lucro</th><th>R$/H</th><th>Ação</th></tr></thead>
+                <tbody id="lista-historico"></tbody>
+            </table>
         </div>
     </div>
 </div>
@@ -124,7 +125,6 @@
         const kml = formatNum('km_litro');
         const gas = formatNum('preco_gas');
         const horas = formatNum('horas_online');
-        const meta = formatNum('meta_dia') || 1;
         
         let bruto = 0;
         document.querySelectorAll('.ganho-in').forEach(input => {
@@ -133,62 +133,49 @@
 
         const custo = kml > 0 ? (km / kml) * gas : 0;
         const lucro = bruto - custo;
-        const rkm = km > 0 ? bruto / km : 0;
         const rhora = horas > 0 ? lucro / horas : 0;
-        const pMeta = (lucro / meta) * 100;
+        const rkm = km > 0 ? bruto / km : 0;
 
-        // Lógica de Comentários/Status
         const divStatus = document.getElementById('status-comentario');
-        let statusTxt = "";
-        let statusClass = "";
-
         if (rhora > 0) {
-            if (rhora >= 35 && rkm >= 2.5) {
-                statusTxt = "Excelente: Dia de Meta Batida! 🚀";
-                statusClass = "perf-excelente";
-            } else if (rhora < 30 || rkm < 1.6) {
-                statusTxt = "Péssimo: Pagou para trabalhar hoje 🛑";
-                statusClass = "perf-pessimo";
-            } else {
-                statusTxt = "Na Média: Trabalho consistente 🆗";
-                statusClass = "perf-media";
-            }
+            let statusTxt = rhora >= 35 ? "Excelente: Acima da Média! 🚀" : (rhora < 30 ? "Péssimo: Pagou para trabalhar 🛑" : "Na Média 🆗");
+            let statusClass = rhora >= 35 ? "perf-excelente" : (rhora < 30 ? "perf-pessimo" : "perf-media");
             divStatus.innerHTML = `<div class="performance-tag ${statusClass}">${statusTxt}</div>`;
-        } else {
-            divStatus.innerHTML = "";
         }
 
-        let metaBadgeClass = 'badge';
-        if(pMeta >= 100) metaBadgeClass += (pMeta >= 120 ? ' badge-over' : ' badge-success');
-
         document.getElementById('painel-resultados').innerHTML = `
-            <div class="live-row"><span>FATURAMENTO BRUTO:</span> <span class="res-bold">R$ ${bruto.toFixed(2)}</span></div>
-            <div class="live-row"><span>CUSTO COMBUSTÍVEL:</span> <span class="res-danger">- R$ ${custo.toFixed(2)}</span></div>
-            <div class="live-row" style="border-top:1px solid #c8e6c9; padding-top:5px; margin-top:5px;">
-                <span>LUCRO LÍQUIDO:</span> <span class="res-bold" style="font-size:1.2rem">R$ ${lucro.toFixed(2)}</span>
-            </div>
-            <div class="live-row"><span>VALOR POR HORA (LÍQ):</span> <span class="res-bold">R$ ${rhora.toFixed(2)}/h</span></div>
-            <div class="live-row"><span>VALOR POR KM (BRUTO):</span> <span class="res-bold">R$ ${rkm.toFixed(2)}/km</span></div>
-            <div class="live-row"><span>META ATINGIDA:</span> <span class="${metaBadgeClass}">${pMeta.toFixed(1)}% da Meta</span></div>
+            <div class="live-row"><span>LUCRO LÍQUIDO:</span> <span class="res-bold">R$ ${lucro.toFixed(2)}</span></div>
+            <div class="live-row"><span>R$ POR HORA:</span> <span class="res-bold">R$ ${rhora.toFixed(2)}/h</span></div>
+            <div class="live-row"><span>R$ POR KM:</span> <span class="res-bold">R$ ${rkm.toFixed(2)}/km</span></div>
         `;
         
-        return { bruto, custo, lucro, km, kml, gas, horas, rhora, meta, rkm,
+        return { bruto, custo, lucro, km, kml, gas, horas, rhora, rkm, 
+                 id: Date.now(), // Gera ID único baseado no tempo
                  g_uber: formatNum('g_uber'), g_99: formatNum('g_99'), 
                  g_shopee: formatNum('g_shopee'), g_part: formatNum('g_part') };
     }
 
     function salvarTurno() {
         const calc = calcularLive();
-        if(calc.km <= 0) return alert("Insira os KM rodados.");
+        if(calc.km <= 0 && calc.bruto <= 0) return alert("Preencha os dados do turno.");
+        
         const data = document.getElementById('data_turno').value;
-        const registro = { data, ...calc };
+        const registro = { ...calc, data };
+        
         let historico = JSON.parse(localStorage.getItem('driver_history_v4') || '[]');
-        const index = historico.findIndex(item => item.data === data);
-        if(index !== -1) historico[index] = registro;
-        else historico.unshift(registro);
+        
+        // Verifica se o registro antigo não tinha ID (dados antigos) e tenta não duplicar
+        historico.push(registro);
+        
         localStorage.setItem('driver_history_v4', JSON.stringify(historico));
-        alert("Turno salvo!");
+        alert("Lançamento salvo com sucesso!");
+        limparCampos();
         switchTab('stats');
+    }
+
+    function limparCampos() {
+        document.querySelectorAll('input[type="number"]').forEach(i => { if(i.id !== 'meta_dia' && i.id !== 'km_litro' && i.id !== 'preco_gas') i.value = ""; });
+        calcularLive();
     }
 
     function renderHistorico() {
@@ -197,83 +184,54 @@
         const fim = document.getElementById('filtro_fim').value;
         
         historico = historico.filter(i => i.data >= inicio && i.data <= fim);
-        historico.sort((a,b) => b.data.localeCompare(a.data));
+        historico.sort((a,b) => b.data.localeCompare(a.data) || b.id - a.id);
 
         const tabela = document.getElementById('lista-historico');
         const resumo = document.getElementById('resumo-periodo-content');
         tabela.innerHTML = "";
         
-        let tKm = 0, tLucro = 0, tHoras = 0, tBruto = 0, tCusto = 0, maxLucro = 0;
-        let diasSemana = {0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0};
-        let nomesDias = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
+        let tLucro = 0, tBruto = 0, tCusto = 0, tHoras = 0;
+        let maxLucro = 0;
 
         historico.forEach(item => {
-            const dataObjeto = new Date(item.data + 'T12:00:00');
-            const diaSemana = dataObjeto.getDay();
-            const dataExibicao = item.data.split('-').reverse().slice(0,2).join('/');
-            
+            const dataExib = item.data.split('-').reverse().slice(0,2).join('/');
             tabela.innerHTML += `<tr>
-                <td>${dataExibicao}</td>
+                <td>${dataExib}</td>
                 <td style="color:var(--primary); font-weight:bold">R$ ${item.lucro.toFixed(2)}</td>
                 <td>R$ ${item.rhora.toFixed(2)}/h</td>
-                <td>
-                    <button style="color:var(--accent); border:none; background:none" onclick="editarRegistro('${item.data}')">✎</button>
-                    <button style="color:var(--danger); border:none; background:none; margin-left:10px" onclick="deletarRegistro('${item.data}')">✕</button>
-                </td>
+                <td><button style="color:var(--danger); background:none; border:none;" onclick="deletar('${item.id || item.data}')">✕</button></td>
             </tr>`;
-            
-            tKm += item.km; tLucro += item.lucro; tHoras += item.horas; tBruto += item.bruto; tCusto += item.custo;
-            diasSemana[diaSemana] += item.lucro;
+            tLucro += item.lucro; tBruto += item.bruto; tCusto += item.custo; tHoras += item.horas;
             if(item.lucro > maxLucro) maxLucro = item.lucro;
         });
 
-        let melhorDiaIdx = Object.keys(diasSemana).reduce((a, b) => diasSemana[a] > diasSemana[b] ? a : b);
-        let melhorDiaNome = diasSemana[melhorDiaIdx] > 0 ? nomesDias[melhorDiaIdx] : "---";
+        const pLucro = tBruto > 0 ? (tLucro / tBruto) * 100 : 0;
+        const pCusto = tBruto > 0 ? (tCusto / tBruto) * 100 : 0;
 
-        if(historico.length > 0) {
-            resumo.innerHTML = `
-                <div class="live-row"><span>LUCRO TOTAL:</span> <span class="res-bold">R$ ${tLucro.toFixed(2)}</span></div>
-                <div class="live-row"><span>LÍQUIDO MÁXIMO (DIA):</span> <span class="res-bold">R$ ${maxLucro.toFixed(2)}</span></div>
-                <div class="live-row"><span>MELHOR DIA:</span> <span class="badge-success" style="padding:2px 8px; border-radius:4px">${melhorDiaNome}</span></div>
-                
-                <div class="live-row" style="border-top:1px solid #555; margin-top:10px; padding-top:5px;">
-                    <span>MÉDIA LÍQUIDA/HORA:</span> <span style="font-weight:bold">R$ ${(tLucro/tHoras || 0).toFixed(2)}/h</span>
-                </div>
-                <div class="live-row">
-                    <span>MÉDIA BRUTA/KM:</span> <span style="font-weight:bold">R$ ${(tBruto/tKm || 0).toFixed(2)}/km</span>
-                </div>
-                
-                <div class="live-row" style="border-top:1px solid #555; margin-top:10px; padding-top:5px; font-size:0.8rem; opacity:0.8">
-                    <span>KM PARA PAGAR CUSTO:</span> <span>${(tCusto / (tBruto/tKm || 1)).toFixed(1)} km</span>
-                </div>
-            `;
-        } else { resumo.innerHTML = "Sem dados."; }
+        resumo.innerHTML = `
+            <div class="live-row"><span>LUCRO TOTAL:</span> <span style="font-weight:bold">R$ ${tLucro.toFixed(2)}</span></div>
+            <div class="live-row"><span>LÍQUIDO MÁXIMO:</span> <span style="font-weight:bold">R$ ${maxLucro.toFixed(2)}</span></div>
+            <div class="live-row"><span>MÉDIA LÍQ/HORA:</span> <span style="font-weight:bold">R$ ${(tLucro/tHoras || 0).toFixed(2)}/h</span></div>
+            
+            <p style="font-size:0.7rem; margin-bottom:5px; margin-top:15px; opacity:0.9">EFICIÊNCIA (LUCRO vs CUSTO):</p>
+            <div class="chart-container">
+                <div class="chart-lucro" style="width:${pLucro}%">${pLucro.toFixed(0)}%</div>
+                <div class="chart-custo" style="width:${pCusto}%">${pCusto.toFixed(0)}%</div>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:0.6rem; opacity:0.8">
+                <span>LUCRO LÍQUIDO</span>
+                <span>CUSTO OPERACIONAL</span>
+            </div>
+        `;
     }
 
-    function editarRegistro(data) {
-        const item = JSON.parse(localStorage.getItem('driver_history_v4')).find(i => i.data === data);
-        if(item) {
-            document.getElementById('data_turno').value = item.data;
-            document.getElementById('km_rodados').value = item.km;
-            document.getElementById('km_litro').value = item.kml;
-            document.getElementById('preco_gas').value = item.gas;
-            document.getElementById('horas_online').value = item.horas;
-            document.getElementById('g_uber').value = item.g_uber;
-            document.getElementById('g_99').value = item.g_99;
-            document.getElementById('g_shopee').value = item.g_shopee;
-            document.getElementById('g_part').value = item.g_part;
-            switchTab('launch');
-            calcularLive();
-            document.getElementById('btn-main-save').innerText = "ATUALIZAR TURNO";
-        }
-    }
-
-    function deletarRegistro(data) {
-        if(confirm("Excluir dia " + data.split('-').reverse().join('/') + "?")) {
-            let hist = JSON.parse(localStorage.getItem('driver_history_v4')).filter(i => i.data !== data);
-            localStorage.setItem('driver_history_v4', JSON.stringify(hist));
-            renderHistorico();
-        }
+    function deletar(id) {
+        if(!confirm("Excluir este lançamento?")) return;
+        let hist = JSON.parse(localStorage.getItem('driver_history_v4'));
+        // Deleta por ID ou por data (para manter compatibilidade com dados antigos)
+        hist = hist.filter(i => (i.id ? i.id.toString() : i.data) !== id.toString());
+        localStorage.setItem('driver_history_v4', JSON.stringify(hist));
+        renderHistorico();
     }
 
     function switchTab(tab) {
@@ -286,16 +244,7 @@
         document.getElementById('page-title').innerText = tab === 'launch' ? 'Lançamento' : 'Relatórios';
     }
 
-    function exportarDados() {
-        const hist = localStorage.getItem('driver_history_v4');
-        const blob = new Blob([hist], {type: 'application/json'});
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = `backup_motorista_${new Date().toISOString().split('T')[0]}.json`;
-        a.click();
-    }
-    
-    calcularLive();
+    renderHistorico();
 </script>
 </body>
 </html>

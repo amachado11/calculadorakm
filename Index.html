@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Driver Intelligence Pro - v6</title>
+    <title>Driver Intelligence Pro - v6.1</title>
     <style>
         :root { --primary: #27ae60; --dark-green: #1e8449; --secondary: #2c3e50; --bg: #f4f7f6; --white: #ffffff; --danger: #e74c3c; --accent: #3498db; --gold: #f39c12; }
         body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); margin: 0; padding-bottom: 90px; color: #333; }
@@ -17,15 +17,14 @@
         label { display: block; font-size: 0.75rem; margin-bottom: 3px; font-weight: 700; color: #7f8c8d; }
         input { width: 100%; padding: 10px; border: 1px solid #dfe6e9; border-radius: 8px; box-sizing: border-box; font-size: 1rem; background: #fafafa; }
         
-        .live-calc { background: #f1fcf4; border-left: 5px solid var(--primary); padding: 12px; border-radius: 8px; }
+        .live-calc { background: #f1fcf4; border-left: 5px solid var(--primary); padding: 12px; border-radius: 8px; margin-top: 10px; }
         .plan-calc { background: #fff9eb; border-left: 5px solid var(--gold); padding: 12px; border-radius: 8px; }
         .live-row { display: flex; justify-content: space-between; font-size: 0.9rem; margin: 5px 0; }
         .res-bold { font-weight: 800; color: var(--primary); }
-        .res-plan { font-weight: 800; color: var(--secondary); }
 
         .chart-container { margin: 15px 0; background: #eee; height: 25px; border-radius: 5px; display: flex; overflow: hidden; border: 1px solid #444; }
-        .chart-lucro { background: var(--primary); height: 100%; transition: 0.5s; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: white; font-weight: bold; }
-        .chart-custo { background: var(--danger); height: 100%; transition: 0.5s; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: white; font-weight: bold; }
+        .chart-lucro { background: var(--primary); height: 100%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: white; font-weight: bold; }
+        .chart-custo { background: var(--danger); height: 100%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: white; font-weight: bold; }
 
         .btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 5px; }
         .btn-save { background: var(--primary); color: white; }
@@ -78,7 +77,7 @@
 
     <div id="tab-plan" class="hidden">
         <div class="card">
-            <h3>Meta do Dia</h3>
+            <h3>Simulador de Meta</h3>
             <div class="input-group"><label>QUANTO QUERO GANHAR LIMPO? (R$)</label><input type="number" id="p_meta" value="200" oninput="calcularPlano()"></div>
             <div class="grid-inputs">
                 <div class="input-group"><label>CONSUMO KM/L</label><input type="number" id="p_kml" value="11.5" oninput="calcularPlano()"></div>
@@ -87,17 +86,12 @@
             <div class="input-group"><label>EXPECTATIVA R$ POR KM (BRUTO)</label><input type="number" id="p_rkm" value="2.20" oninput="calcularPlano()"></div>
         </div>
 
-        <div class="card plan-calc">
-            <h3>Estimativa de Trabalho</h3>
-            <div id="resumo-plano"></div>
-        </div>
-        <p style="font-size: 0.75rem; color: #7f8c8d; text-align: center; padding: 10px;">
-            *Cálculo baseado na sua eficiência média e custos operacionais.
-        </p>
+        <div class="card plan-calc" id="resumo-plano"></div>
     </div>
 
     <div id="tab-stats" class="hidden">
         <div class="card">
+            <h3>Filtrar Período</h3>
             <div style="display:flex; gap:5px;">
                 <input type="date" id="filtro_inicio" style="flex:1">
                 <input type="date" id="filtro_fim" style="flex:1">
@@ -105,11 +99,12 @@
             </div>
         </div>
         <div class="card" style="background:var(--secondary); color:white;">
+            <h3 style="color:white; border-color:#444;">Saúde Financeira do Período</h3>
             <div id="resumo-periodo-content"></div>
         </div>
         <div class="card" style="padding:0; overflow-x:auto;">
             <table>
-                <thead><tr><th>Data</th><th>Lucro</th><th>R$/H</th><th>Ações</th></tr></thead>
+                <thead><tr><th>Data</th><th>Lucro</th><th>R$/H</th><th>Ação</th></tr></thead>
                 <tbody id="lista-historico"></tbody>
             </table>
         </div>
@@ -136,30 +131,28 @@
         const custo = kml > 0 ? (km / kml) * gas : 0;
         const lucro = bruto - custo;
         const rhora = horas > 0 ? lucro / horas : 0;
+        const rkm = km > 0 ? bruto / km : 0;
+
         document.getElementById('painel-resultados').innerHTML = `
             <div class="live-row"><span>LUCRO LÍQUIDO:</span> <span class="res-bold">R$ ${lucro.toFixed(2)}</span></div>
             <div class="live-row"><span>R$ POR HORA:</span> <span class="res-bold">R$ ${rhora.toFixed(2)}/h</span></div>
+            <div class="live-row"><span>R$ POR KM:</span> <span class="res-bold">R$ ${rkm.toFixed(2)}/km</span></div>
         `;
-        return { bruto, custo, lucro, km, kml, gas, horas, rhora, g_uber:getVal('g_uber'), g_99:getVal('g_99'), g_shopee:getVal('g_shopee'), g_part:getVal('g_part') };
+        return { bruto, custo, lucro, km, kml, gas, horas, rhora, rkm, g_uber:getVal('g_uber'), g_99:getVal('g_99'), g_shopee:getVal('g_shopee'), g_part:getVal('g_part') };
     }
 
     function calcularPlano() {
         const meta = getVal('p_meta'), kml = getVal('p_kml'), gas = getVal('p_gas'), rkmExpect = getVal('p_rkm');
-        
-        // Regra de 3: Bruto = Meta + Custo. Custo = (KM * Gas) / KML. Bruto = KM * RKM_Expect.
-        // KM = Meta / (RKM_Expect - (Gas/KML))
         const custoPorKm = kml > 0 ? gas / kml : 0;
         const kmNecessario = rkmExpect > custoPorKm ? meta / (rkmExpect - custoPorKm) : 0;
         const faturamentoBruto = kmNecessario * rkmExpect;
         const totalCusto = kmNecessario * custoPorKm;
-        
-        // Estimativa de horas baseada em R$ 35,00/h (Sua média)
         const horasEst = meta / 35;
 
         document.getElementById('resumo-plano').innerHTML = `
-            <div class="live-row"><span>FATURAMENTO ALVO:</span> <span class="res-plan" style="color:var(--gold)">R$ ${faturamentoBruto.toFixed(2)}</span></div>
-            <div class="live-row"><span>KM ESTIMADO:</span> <span class="res-plan">${kmNecessario.toFixed(0)} km</span></div>
-            <div class="live-row"><span>TEMPO ESTIMADO:</span> <span class="res-plan">${horasEst.toFixed(1)} h</span></div>
+            <div class="live-row"><span>FATURAMENTO BRUTO ALVO:</span> <b style="color:var(--gold)">R$ ${faturamentoBruto.toFixed(2)}</b></div>
+            <div class="live-row"><span>KM PARA RODAR:</span> <b>${kmNecessario.toFixed(0)} km</b></div>
+            <div class="live-row"><span>TEMPO ESTIMADO:</span> <b>${horasEst.toFixed(1)} h</b></div>
             <hr style="border:0; border-top:1px solid #ddd; margin:10px 0;">
             <div class="live-row" style="font-size:0.8rem"><span>Custo Combustível:</span> <span>R$ ${totalCusto.toFixed(2)}</span></div>
         `;
@@ -178,7 +171,7 @@
             hist.push({ ...calc, data, id: Date.now() });
         }
         localStorage.setItem('driver_history_v4', JSON.stringify(hist));
-        alert("Salvo!");
+        alert("Salvo com sucesso!");
         limparCampos();
         switchTab('stats');
     }
@@ -200,7 +193,7 @@
         
         const tabela = document.getElementById('lista-historico');
         tabela.innerHTML = "";
-        let tL = 0, tB = 0, tC = 0, tH = 0;
+        let tL = 0, tB = 0, tC = 0, tH = 0, maxL = 0;
 
         hist.forEach(item => {
             const id = item.id ? item.id.toString() : item.data;
@@ -208,21 +201,26 @@
                 <td>${item.data.split('-').reverse().slice(0,2).join('/')}</td>
                 <td style="color:var(--primary); font-weight:bold">R$ ${item.lucro.toFixed(2)}</td>
                 <td>R$ ${item.rhora.toFixed(2)}/h</td>
-                <td>
-                    <button style="color:var(--accent); border:none; background:none;" onclick="editar('${id}')">✎</button>
-                    <button style="color:var(--danger); border:none; background:none;" onclick="deletar('${id}')">✕</button>
+                <td style="white-space:nowrap">
+                    <button style="color:var(--accent); border:none; background:none; font-size:1.1rem;" onclick="editar('${id}')">✎</button>
+                    <button style="color:var(--danger); border:none; background:none; font-size:1.1rem;" onclick="deletar('${id}')">✕</button>
                 </td>
             </tr>`;
             tL += item.lucro; tB += item.bruto; tC += item.custo; tH += item.horas;
+            if(item.lucro > maxL) maxL = item.lucro;
         });
 
         const pL = tB > 0 ? (tL / tB) * 100 : 0, pC = tB > 0 ? (tC / tB) * 100 : 0;
         document.getElementById('resumo-periodo-content').innerHTML = `
             <div class="live-row"><span>LUCRO TOTAL:</span> <b>R$ ${tL.toFixed(2)}</b></div>
-            <div class="live-row"><span>MÉDIA LÍQ/H:</span> <b>R$ ${(tL/tH || 0).toFixed(2)}/h</b></div>
+            <div class="live-row"><span>LÍQUIDO MÁXIMO:</span> <b>R$ ${maxL.toFixed(2)}</b></div>
+            <div class="live-row"><span>MÉDIA LÍQ/HORA:</span> <b>R$ ${(tL/tH || 0).toFixed(2)}/h</b></div>
             <div class="chart-container">
                 <div class="chart-lucro" style="width:${pL}%">${pL.toFixed(0)}%</div>
                 <div class="chart-custo" style="width:${pC}%">${pC.toFixed(0)}%</div>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:0.6rem; opacity:0.8">
+                <span>LUCRO LÍQUIDO</span><span>CUSTO OPERACIONAL</span>
             </div>
         `;
     }
@@ -233,6 +231,8 @@
         if (item) {
             document.getElementById('data_turno').value = item.data;
             document.getElementById('km_rodados').value = item.km;
+            document.getElementById('km_litro').value = item.kml || 11.5;
+            document.getElementById('preco_gas').value = item.gas || 6.35;
             document.getElementById('horas_online').value = item.horas;
             document.getElementById('g_uber').value = item.g_uber;
             document.getElementById('g_99').value = item.g_99;
@@ -246,7 +246,7 @@
     }
 
     function deletar(id) {
-        if(!confirm("Excluir?")) return;
+        if(!confirm("Deseja excluir este registro?")) return;
         let hist = JSON.parse(localStorage.getItem('driver_history_v4')).filter(i => (i.id ? i.id.toString() : i.data) !== id.toString());
         localStorage.setItem('driver_history_v4', JSON.stringify(hist));
         renderHistorico();

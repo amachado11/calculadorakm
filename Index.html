@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Finanças Insight - Calendário Completo</title>
+  <title>Finanças Insight</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
     body { background-color: #11111b; color: #cdd6f4; padding: 12px; max-width: 600px; margin: 0 auto; }
@@ -22,9 +22,11 @@
     .campo-form label { display: block; font-size: 0.75rem; color: #a6adc8; margin-bottom: 4px; }
     .campo-form input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #313244; background: #181825; color: #cdd6f4; }
     
+    /* Card de Cálculos Automáticos Restaurado */
     .card-calculos-auto { background: #181825; border-radius: 10px; padding: 14px; margin-top: 14px; border: 1px solid #313244; }
+    .card-calculos-auto h4 { font-size: 0.85rem; color: #89b4fa; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
     .linha-calculo { display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 6px; color: #bac2de; }
-    .destaque { font-size: 1.05rem; font-weight: bold; color: #a6e3a1; border-top: 1px dashed #313244; padding-top: 8px; margin-top: 8px; }
+    .linha-calculo.destaque { font-size: 1.05rem; font-weight: bold; color: #a6e3a1; border-top: 1px dashed #313244; padding-top: 8px; margin-top: 8px; }
 
     /* Aba 2: Calendário */
     .header-calendario-controles { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
@@ -35,7 +37,6 @@
     .metrica-item .label { display: block; font-size: 0.7rem; color: #a6adc8; margin-bottom: 4px; }
     .metrica-item strong { font-size: 0.85rem; color: #a6e3a1; }
     
-    /* Input da Meta Editável */
     .input-meta-edit {
       background: transparent;
       border: 1px dashed #45475a;
@@ -51,9 +52,26 @@
 
     .grade-dias-semana { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-weight: bold; font-size: 0.75rem; color: #a6adc8; margin-bottom: 6px; }
     .grade-calendario { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 16px; }
-    .dia-card { background: #181825; border-radius: 8px; min-height: 45px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem; color: #585b70; }
-    .dia-card.meta-atingida { background: #1e2e24; color: #a6e3a1; }
-    .dia-card.meta-parcial { background: #2d2a1e; color: #f9e2af; }
+    
+    /* Quadrados do Dia com Valor Restaurados */
+    .dia-card {
+      background: #181825;
+      border-radius: 8px;
+      min-height: 58px;
+      padding: 6px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border-left: 3px solid #45475a;
+    }
+    .dia-card .num-dia { font-weight: bold; font-size: 0.75rem; color: #cdd6f4; }
+    .dia-card .val-faturado { font-size: 0.68rem; font-weight: 600; color: #585b70; }
+
+    .dia-card.meta-atingida { border-left-color: #a6e3a1; background: #1e2e24; }
+    .dia-card.meta-atingida .val-faturado { color: #a6e3a1; }
+
+    .dia-card.meta-parcial { border-left-color: #f9e2af; background: #2d2a1e; }
+    .dia-card.meta-parcial .val-faturado { color: #f9e2af; }
     
     .legenda-container { display: flex; justify-content: space-around; font-size: 0.7rem; margin-bottom: 12px; color: #a6adc8; }
     .item-legenda { display: flex; align-items: center; gap: 4px; }
@@ -61,30 +79,11 @@
     .dot.verde { background-color: #a6e3a1; }
     .dot.amarelo { background-color: #f9e2af; }
 
-    /* Painel de Resumo Acumulado no Rodapé */
-    .card-resumo-mes {
-      background: #181825;
-      border-radius: 12px;
-      padding: 14px;
-      border: 1px solid #313244;
-    }
-    .card-resumo-mes h4 {
-      font-size: 0.85rem;
-      color: #89b4fa;
-      margin-bottom: 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .grid-resumo-detalhado {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-    }
-    .item-detalhe {
-      background: #1e1e2e;
-      padding: 8px 10px;
-      border-radius: 8px;
-    }
+    /* Painel do Rodapé */
+    .card-resumo-mes { background: #181825; border-radius: 12px; padding: 14px; border: 1px solid #313244; }
+    .card-resumo-mes h4 { font-size: 0.85rem; color: #89b4fa; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .grid-resumo-detalhado { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .item-detalhe { background: #1e1e2e; padding: 8px 10px; border-radius: 8px; }
     .item-detalhe .lbl { display: block; font-size: 0.7rem; color: #a6adc8; }
     .item-detalhe .val { font-size: 0.9rem; font-weight: bold; color: #cdd6f4; }
     .item-detalhe.full { grid-column: span 2; background: #232a2e; border: 1px solid #313244; }
@@ -103,23 +102,28 @@
     <div class="card-painel">
       <div class="form-grid">
         <div class="campo-form full"><label>Data</label><input type="date" id="input-data" onchange="carregarDadosDataSelecionada()" /></div>
-        <div class="campo-form"><label>Ganho Uber (R$)</label><input type="number" id="input-uber" oninput="calcularEAtualizarAba1()" /></div>
-        <div class="campo-form"><label>Ganho 99 (R$)</label><input type="number" id="input-99" oninput="calcularEAtualizarAba1()" /></div>
-        <div class="campo-form"><label>KM Rodado</label><input type="number" id="input-km" oninput="calcularEAtualizarAba1()" /></div>
-        <div class="campo-form"><label>Média (KM/L)</label><input type="number" id="input-kml" value="10.5" oninput="calcularEAtualizarAba1()" /></div>
+        <div class="campo-form"><label>Ganho Uber (R$)</label><input type="number" id="input-uber" step="0.01" oninput="calcularEAtualizarAba1()" /></div>
+        <div class="campo-form"><label>Ganho 99 (R$)</label><input type="number" id="input-99" step="0.01" oninput="calcularEAtualizarAba1()" /></div>
+        <div class="campo-form"><label>KM Rodado</label><input type="number" id="input-km" step="0.1" oninput="calcularEAtualizarAba1()" /></div>
+        <div class="campo-form"><label>Média (KM/L)</label><input type="number" id="input-kml" value="10.5" step="0.1" oninput="calcularEAtualizarAba1()" /></div>
         <div class="campo-form full"><label>Preço Gasolina (R$/L)</label><input type="number" id="input-preco-gas" value="5.69" step="0.01" oninput="calcularEAtualizarAba1()" /></div>
       </div>
       
+      <!-- CÁLCULOS AUTOMÁTICOS COMPLETOS RESTAURADOS -->
       <div class="card-calculos-auto">
-        <div class="linha-calculo"><span>Bruto Total:</span><strong id="calc-bruto">R$ 0,00</strong></div>
-        <div class="linha-calculo"><span>Custo Gasolina:</span><strong id="calc-custo-gas">R$ 0,00</strong></div>
-        <div class="linha-calculo destaque"><span>Líquido:</span><strong id="calc-liquido">R$ 0,00</strong></div>
+        <h4>⚡ Cálculos Automáticos do Dia</h4>
+        <div class="linha-calculo"><span>Faturamento Bruto Total:</span><strong id="calc-bruto">R$ 0,00</strong></div>
+        <div class="linha-calculo"><span>Gasolina Consumida:</span><strong id="calc-litros">0,00 L</strong></div>
+        <div class="linha-calculo"><span>Custo do Combustível:</span><strong id="calc-custo-gas" style="color: #f38ba8;">R$ 0,00</strong></div>
+        <div class="linha-calculo"><span>Rendimento Bruto/KM:</span><strong id="calc-rend-km">R$ 0,00 / km</strong></div>
+        <div class="linha-calculo destaque"><span>Lucro Líquido Final:</span><strong id="calc-liquido">R$ 0,00</strong></div>
       </div>
+
       <button style="width:100%; padding:12px; border:none; border-radius:8px; background:#a6e3a1; margin-top:12px; font-weight:bold; cursor:pointer;" onclick="salvarLancamentoDiario()">💾 Salvar Lançamento</button>
     </div>
   </section>
 
-  <!-- ABA 2: CALENDÁRIO COM DASHBOARD -->
+  <!-- ABA 2: CALENDÁRIO COM VALORES NOS DIAS E CONSOLIDADO -->
   <section id="aba-calendario" class="aba-conteudo">
     <div class="card-painel">
       <div class="header-calendario-controles">
@@ -155,7 +159,7 @@
 
     <div id="grade-calendario" class="grade-calendario"></div>
 
-    <!-- Resumo do Mês abaixo do Calendário -->
+    <!-- Consolidado do Mês -->
     <div class="card-resumo-mes">
       <h4>📊 Consolidado do Mês</h4>
       <div class="grid-resumo-detalhado">
@@ -215,12 +219,15 @@
       const litros = kml > 0 ? km / kml : 0;
       const custoGasolina = litros * precoGas;
       const liquido = bruto - custoGasolina;
+      const rendimentoPorKm = km > 0 ? bruto / km : 0;
 
       document.getElementById('calc-bruto').innerText = `R$ ${bruto.toFixed(2)}`;
+      document.getElementById('calc-litros').innerText = `${litros.toFixed(2)} L`;
       document.getElementById('calc-custo-gas').innerText = `R$ ${custoGasolina.toFixed(2)}`;
+      document.getElementById('calc-rend-km').innerText = `R$ ${rendimentoPorKm.toFixed(2)} / km`;
       document.getElementById('calc-liquido').innerText = `R$ ${liquido.toFixed(2)}`;
 
-      return { uber, n99, bruto, km, kml, precoGas, litros, custoGasolina, liquido };
+      return { uber, n99, bruto, km, kml, precoGas, litros, custoGasolina, liquido, rendimentoPorKm };
     }
 
     function carregarDadosDataSelecionada() {
@@ -263,7 +270,7 @@
       const ano = dataAtualCal.getFullYear();
       const mes = dataAtualCal.getMonth();
       const metaMensal = obterMetaMensal();
-      const metaDiaria = metaMensal / 22; // Regra dos 22 dias trabalhados
+      const metaDiaria = metaMensal / 22;
 
       document.getElementById('input-meta-mensal').value = metaMensal;
 
@@ -293,13 +300,12 @@
       for (let d = 1; d <= totalDiasMes; d++) {
         const dataStr = `${ano}-${String(mes + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
         const reg = fechamentos.find(f => f.data === dataStr);
+        const liq = reg ? Number(reg.liquido || 0) : 0;
 
         const div = document.createElement('div');
         div.className = 'dia-card';
-        div.innerText = d;
 
         if (reg) {
-          const liq = reg.liquido || 0;
           totalLiquido += liq;
           totalBruto += (reg.bruto || 0);
           totalKm += (reg.km || 0);
@@ -315,6 +321,12 @@
           }
         }
 
+        // Renderiza número do dia + valor em reais no card
+        div.innerHTML = `
+          <span class="num-dia">${d}</span>
+          <span class="val-faturado">${liq > 0 ? 'R$ ' + Math.round(liq) : '-'}</span>
+        `;
+
         grade.appendChild(div);
       }
 
@@ -322,7 +334,7 @@
       document.getElementById('cal-faturado-total').innerText = `R$ ${totalLiquido.toFixed(2)}`;
       document.getElementById('cal-dias-rodados').innerText = `${diasRodados} / 22`;
 
-      // Atualiza o Consolidado do Mês (Abaixo)
+      // Atualiza o Consolidado do Mês
       const faltaMeta = metaMensal - totalLiquido;
       const mediaKmlPonderada = totalLitros > 0 ? totalKm / totalLitros : 0;
       const precoGasMedio = diasRodados > 0 ? somaPrecoGas / diasRodados : 0;

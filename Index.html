@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Finanças Insight - Calendário de Metas</title>
+  <title>Finanças Insight - Calendário Líquido</title>
   <style>
-    /* Reset Básico e Fontes */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -21,7 +20,6 @@
       margin: 0 auto;
     }
 
-    /* Menu de Navegação por Abas */
     .navbar {
       display: flex;
       gap: 8px;
@@ -41,7 +39,6 @@
       font-weight: 600;
       font-size: 0.85rem;
       cursor: pointer;
-      transition: all 0.2s ease;
     }
 
     .nav-btn.ativo {
@@ -49,16 +46,10 @@
       color: #cdd6f4;
     }
 
-    /* Conteúdo das Abas */
-    .aba-conteudo {
-      display: none;
-    }
+    .aba-conteudo { display: none; }
+    .aba-conteudo.ativa { display: block; }
 
-    .aba-conteudo.ativa {
-      display: block;
-    }
-
-    /* Card de Resumo do Calendário */
+    /* Card Resumo */
     .card-resumo-calendario {
       background: #1e1e2e;
       border-radius: 12px;
@@ -74,10 +65,7 @@
       margin-bottom: 14px;
     }
 
-    .header-calendario-controles h3 {
-      font-size: 1.1rem;
-      color: #f5e0dc;
-    }
+    .header-calendario-controles h3 { font-size: 1.1rem; color: #f5e0dc; }
 
     .btn-nav-mes {
       background: #313244;
@@ -112,10 +100,9 @@
 
     .metrica-item strong {
       font-size: 0.85rem;
-      color: #89b4fa;
+      color: #a6e3a1; /* Verde focado no líquido */
     }
 
-    /* Legenda de Cores */
     .legenda-container {
       display: flex;
       justify-content: space-between;
@@ -125,23 +112,13 @@
       color: #a6adc8;
     }
 
-    .item-legenda {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-    }
-
+    .item-legenda { display: flex; align-items: center; gap: 4px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; }
     .dot.verde { background-color: #a6e3a1; }
     .dot.amarelo { background-color: #f9e2af; }
     .dot.cinza { background-color: #45475a; }
 
-    /* Grade do Calendário CSS Grid */
+    /* Grade do Calendário */
     .grade-dias-semana {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
@@ -167,54 +144,26 @@
       flex-direction: column;
       justify-content: space-between;
       cursor: pointer;
-      border-left: 3px solid #45475a; /* Padrão Folga */
-      transition: transform 0.1s ease;
+      border-left: 3px solid #45475a;
     }
 
-    .dia-card:active {
-      transform: scale(0.96);
-    }
+    .dia-card.vazio { background: transparent; border: none; cursor: default; }
+    .dia-card .num-dia { font-weight: bold; font-size: 0.75rem; color: #cdd6f4; }
+    .dia-card .val-faturado { font-size: 0.68rem; font-weight: 600; }
 
-    .dia-card.vazio {
-      background: transparent;
-      border: none;
-      cursor: default;
-    }
-
-    .dia-card .num-dia {
-      font-weight: bold;
-      font-size: 0.75rem;
-      color: #cdd6f4;
-    }
-
-    .dia-card .val-faturado {
-      font-size: 0.68rem;
-      font-weight: 600;
-    }
-
-    /* Cores de Status das Metas */
-    .dia-card.meta-atingida {
-      border-left-color: #a6e3a1;
-      background: #1e2e24;
-    }
+    .dia-card.meta-atingida { border-left-color: #a6e3a1; background: #1e2e24; }
     .dia-card.meta-atingida .val-faturado { color: #a6e3a1; }
 
-    .dia-card.meta-parcial {
-      border-left-color: #f9e2af;
-      background: #2d2a1e;
-    }
+    .dia-card.meta-parcial { border-left-color: #f9e2af; background: #2d2a1e; }
     .dia-card.meta-parcial .val-faturado { color: #f9e2af; }
 
     .dia-card.folga .val-faturado { color: #585b70; }
 
-    /* Modal de Detalhes do Dia */
+    /* Modal Form Detalhado */
     .modal-overlay {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.7);
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.75);
       display: none;
       justify-content: center;
       align-items: center;
@@ -225,26 +174,30 @@
     .modal-conteudo {
       background: #1e1e2e;
       border-radius: 12px;
-      padding: 20px;
+      padding: 18px;
       width: 100%;
-      max-width: 360px;
+      max-width: 400px;
       border: 1px solid #313244;
+      max-height: 90vh;
+      overflow-y: auto;
     }
 
-    .modal-conteudo h4 {
-      margin-bottom: 12px;
-      color: #f5e0dc;
+    .modal-conteudo h4 { margin-bottom: 12px; color: #f5e0dc; }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
     }
 
-    .campo-modal {
-      margin-bottom: 12px;
-    }
+    .campo-modal { margin-bottom: 8px; }
+    .campo-modal.full { grid-column: span 2; }
 
     .campo-modal label {
       display: block;
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       color: #a6adc8;
-      margin-bottom: 4px;
+      margin-bottom: 3px;
     }
 
     .campo-modal input {
@@ -254,49 +207,58 @@
       border: 1px solid #313244;
       background: #181825;
       color: #cdd6f4;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
     }
 
-    .modal-acoes {
-      display: flex;
-      gap: 8px;
-      margin-top: 16px;
-    }
-
-    .btn-modal {
-      flex: 1;
+    /* Card Resultados Calculados */
+    .resumo-calculado-card {
+      background: #181825;
+      border-radius: 8px;
       padding: 10px;
-      border: none;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
+      margin-top: 10px;
+      grid-column: span 2;
+      border: 1px solid #313244;
     }
 
+    .linha-resumo {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      margin-bottom: 4px;
+    }
+
+    .linha-resumo.destaque {
+      font-weight: bold;
+      font-size: 0.9rem;
+      color: #a6e3a1;
+      border-top: 1px solid #313244;
+      padding-top: 4px;
+      margin-top: 4px;
+    }
+
+    .modal-acoes { display: flex; gap: 8px; margin-top: 14px; }
+    .btn-modal { flex: 1; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
     .btn-salvar { background: #a6e3a1; color: #11111b; }
     .btn-fechar { background: #313244; color: #cdd6f4; }
   </style>
 </head>
 <body>
 
-  <!-- Menu Principal -->
   <nav class="navbar">
     <button class="nav-btn ativo" onclick="trocarAba('lancamentos')">📊 Lançamentos</button>
     <button class="nav-btn" onclick="trocarAba('calendario')">📅 Calendário</button>
   </nav>
 
-  <!-- Aba 1: Lançamentos (Simulação) -->
   <section id="aba-lancamentos" class="aba-conteudo ativa">
     <div class="card-resumo-calendario">
-      <h3>Registrar Dia de Trabalho</h3>
+      <h3>Finanças Insight</h3>
       <p style="font-size: 0.8rem; color: #a6adc8; margin-top: 6px;">
-        Alterne para a aba <strong>Calendário</strong> para visualizar o progresso visual das suas metas mensais!
+        Clique na aba <strong>Calendário</strong> e selecione um dia para registrar seus ganhos e consumo de gasolina com cálculo de lucro líquido automático!
       </p>
     </div>
   </section>
 
-  <!-- Aba 2: Calendário -->
   <section id="aba-calendario" class="aba-conteudo">
-    <!-- Painel de Resumo -->
     <div class="card-resumo-calendario">
       <div class="header-calendario-controles">
         <button class="btn-nav-mes" onclick="mudarMes(-1)">◀</button>
@@ -306,11 +268,11 @@
       
       <div class="metricas-resumo-grid">
         <div class="metrica-item">
-          <span class="label">Meta Mensal</span>
-          <strong id="cal-meta-mensal">R$ 7.586,26</strong>
+          <span class="label">Meta Líquida</span>
+          <strong id="cal-meta-mensal">R$ 5.500,00</strong>
         </div>
         <div class="metrica-item">
-          <span class="label">Faturado</span>
+          <span class="label">Líquido Atual</span>
           <strong id="cal-faturado-total">R$ 0,00</strong>
         </div>
         <div class="metrica-item">
@@ -320,46 +282,77 @@
       </div>
     </div>
 
-    <!-- Legenda de Cores -->
     <div class="legenda-container">
-      <span class="item-legenda"><span class="dot verde"></span> Meta (≥ R$ 345)</span>
+      <span class="item-legenda"><span class="dot verde"></span> Meta (Líquido ≥ R$ 250)</span>
       <span class="item-legenda"><span class="dot amarelo"></span> Parcial</span>
       <span class="item-legenda"><span class="dot cinza"></span> Folga</span>
     </div>
 
-    <!-- Dias da Semana -->
     <div class="grade-dias-semana">
       <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
     </div>
 
-    <!-- Grade Dinâmica -->
     <div id="grade-calendario" class="grade-calendario"></div>
   </section>
 
-  <!-- Modal para Detalhes e Lançamento Direto no Dia -->
+  <!-- Modal Formulario Detalhado -->
   <div id="modal-dia" class="modal-overlay">
     <div class="modal-conteudo">
-      <h4 id="modal-titulo-data">Detalhes do Dia</h4>
+      <h4 id="modal-titulo-data">Fechamento do Dia</h4>
       
-      <div class="campo-modal">
-        <label for="input-faturamento">Faturamento Bruto (R$)</label>
-        <input type="number" id="input-faturamento" placeholder="Ex: 350.00" step="0.01" />
+      <div class="form-grid">
+        <div class="campo-modal">
+          <label>Ganho Uber (R$)</label>
+          <input type="number" id="input-uber" placeholder="0.00" oninput="calcularTotaisModal()" />
+        </div>
+        <div class="campo-modal">
+          <label>Ganho 99 (R$)</label>
+          <input type="number" id="input-99" placeholder="0.00" oninput="calcularTotaisModal()" />
+        </div>
+
+        <div class="campo-modal">
+          <label>Km Rodados</label>
+          <input type="number" id="input-km" placeholder="Ex: 180" oninput="calcularTotaisModal()" />
+        </div>
+        <div class="campo-modal">
+          <label>Média (Km/L)</label>
+          <input type="number" id="input-kml" value="10.5" step="0.1" oninput="calcularTotaisModal()" />
+        </div>
+
+        <div class="campo-modal full">
+          <label>Preço Gasolina (R$/L)</label>
+          <input type="number" id="input-preco-gas" value="5.69" step="0.01" oninput="calcularTotaisModal()" />
+        </div>
+
+        <!-- Resultados em tempo real -->
+        <div class="resumo-calculado-card">
+          <div class="linha-resumo">
+            <span>Faturamento Bruto:</span>
+            <span id="res-bruto">R$ 0,00</span>
+          </div>
+          <div class="linha-resumo">
+            <span>Custo Gasolina:</span>
+            <span id="res-gasolina" style="color: #f38ba8;">R$ 0,00</span>
+          </div>
+          <div class="linha-resumo destaque">
+            <span>Ganho Líquido:</span>
+            <span id="res-liquido">R$ 0,00</span>
+          </div>
+        </div>
       </div>
 
       <div class="modal-acoes">
         <button class="btn-modal btn-fechar" onclick="fecharModal()">Cancelar</button>
-        <button class="btn-modal btn-salvar" onclick="salvarFaturamentoDia()">Salvar</button>
+        <button class="btn-modal btn-salvar" onclick="salvarFechamentoDia()">Salvar Fechamento</button>
       </div>
     </div>
   </div>
 
   <script>
-    // Estado Global da Aplicação
     let dataAtualCal = new Date();
     let dataSelecionadaFormatada = '';
-    const META_DIARIA = 345.00; // Meta do modelo híbrido (345/dia)
+    const META_LIQUIDA_DIARIA = 250.00; // Meta focada no LÍQUIDO (R$ 5.500 / 22 dias)
 
-    // Troca de Abas
     function trocarAba(nomeAba) {
       document.querySelectorAll('.aba-conteudo').forEach(el => el.classList.remove('ativa'));
       document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('ativo'));
@@ -375,13 +368,11 @@
       }
     }
 
-    // Navegação de Mês
     function mudarMes(delta) {
       dataAtualCal.setMonth(dataAtualCal.getMonth() + delta);
       renderizarCalendario();
     }
 
-    // Renderiza a Grade do Calendário
     function renderizarCalendario() {
       const ano = dataAtualCal.getFullYear();
       const mes = dataAtualCal.getMonth();
@@ -394,36 +385,31 @@
       const containerGrade = document.getElementById('grade-calendario');
       containerGrade.innerHTML = '';
 
-      // Recupera dados salvos
-      const lancamentos = JSON.parse(localStorage.getItem('financas_lancamentos') || '[]');
+      const fechamentos = JSON.parse(localStorage.getItem('financas_fechamentos') || '[]');
 
-      let totalFaturadoMes = 0;
+      let totalLiquidoMes = 0;
       let diasRodados = 0;
 
-      // Células vazias de alinhamento do primeiro dia
       for (let i = 0; i < primeiroDiaSemana; i++) {
         const divVazia = document.createElement('div');
         divVazia.className = 'dia-card vazio';
         containerGrade.appendChild(divVazia);
       }
 
-      // Preenche todos os dias do mês
       for (let dia = 1; dia <= totalDiasMes; dia++) {
         const dataFormatada = `${ano}-${String(mes + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
-        
-        const faturadoDia = lancamentos
-          .filter(l => l.data === dataFormatada)
-          .reduce((acc, curr) => acc + Number(curr.valor || 0), 0);
+        const reg = fechamentos.find(f => f.data === dataFormatada);
+        const liquidoDia = reg ? Number(reg.liquido || 0) : 0;
 
-        totalFaturadoMes += faturadoDia;
+        if (liquidoDia > 0) totalLiquidoMes += liquidoDia;
 
         const divDia = document.createElement('div');
         divDia.className = 'dia-card';
 
-        if (faturadoDia >= META_DIARIA) {
+        if (liquidoDia >= META_LIQUIDA_DIARIA) {
           divDia.classList.add('meta-atingida');
           diasRodados++;
-        } else if (faturadoDia > 0) {
+        } else if (liquidoDia > 0) {
           divDia.classList.add('meta-parcial');
           diasRodados++;
         } else {
@@ -432,25 +418,50 @@
 
         divDia.innerHTML = `
           <span class="num-dia">${dia}</span>
-          <span class="val-faturado">${faturadoDia > 0 ? 'R$ ' + faturadoDia.toFixed(0) : '-'}</span>
+          <span class="val-faturado">${liquidoDia > 0 ? 'R$ ' + liquidoDia.toFixed(0) : '-'}</span>
         `;
 
-        divDia.onclick = () => abrirModalDia(dataFormatada, faturadoDia);
+        divDia.onclick = () => abrirModalDia(dataFormatada, reg);
         containerGrade.appendChild(divDia);
       }
 
-      // Atualiza resumos superiores
-      document.getElementById('cal-faturado-total').innerText = `R$ ${totalFaturadoMes.toFixed(2)}`;
+      document.getElementById('cal-faturado-total').innerText = `R$ ${totalLiquidoMes.toFixed(2)}`;
       document.getElementById('cal-dias-rodados').innerText = `${diasRodados} / 22`;
     }
 
-    // Modal de Interação por Dia
-    function abrirModalDia(dataFormatada, valorAtual) {
+    // Cálculos em tempo real dentro do modal
+    function calcularTotaisModal() {
+      const uber = parseFloat(document.getElementById('input-uber').value) || 0;
+      const noventaNove = parseFloat(document.getElementById('input-99').value) || 0;
+      const km = parseFloat(document.getElementById('input-km').value) || 0;
+      const kml = parseFloat(document.getElementById('input-kml').value) || 10.5;
+      const precoGas = parseFloat(document.getElementById('input-preco-gas').value) || 5.69;
+
+      const bruto = uber + noventaNove;
+      const litros = kml > 0 ? km / kml : 0;
+      const custoGasolina = litros * precoGas;
+      const liquido = bruto - custoGasolina;
+
+      document.getElementById('res-bruto').innerText = `R$ ${bruto.toFixed(2)}`;
+      document.getElementById('res-gasolina').innerText = `R$ ${custoGasolina.toFixed(2)}`;
+      document.getElementById('res-liquido').innerText = `R$ ${liquido.toFixed(2)}`;
+
+      return { bruto, custoGasolina, liquido, uber, noventaNove, km, kml, precoGas };
+    }
+
+    function abrirModalDia(dataFormatada, registroExistente) {
       dataSelecionadaFormatada = dataFormatada;
       const [ano, mes, dia] = dataFormatada.split('-');
       
-      document.getElementById('modal-titulo-data').innerText = `Dia ${dia}/${mes}/${ano}`;
-      document.getElementById('input-faturamento').value = valorAtual > 0 ? valorAtual : '';
+      document.getElementById('modal-titulo-data').innerText = `Fechamento ${dia}/${mes}/${ano}`;
+      
+      document.getElementById('input-uber').value = registroExistente ? registroExistente.uber || '' : '';
+      document.getElementById('input-99').value = registroExistente ? registroExistente.noventaNove || '' : '';
+      document.getElementById('input-km').value = registroExistente ? registroExistente.km || '' : '';
+      document.getElementById('input-kml').value = registroExistente ? registroExistente.kml : 10.5;
+      document.getElementById('input-preco-gas').value = registroExistente ? registroExistente.precoGas : 5.69;
+
+      calcularTotaisModal();
       document.getElementById('modal-dia').style.display = 'flex';
     }
 
@@ -458,27 +469,24 @@
       document.getElementById('modal-dia').style.display = 'none';
     }
 
-    function salvarFaturamentoDia() {
-      const valorInput = parseFloat(document.getElementById('input-faturamento').value) || 0;
-      let lancamentos = JSON.parse(localStorage.getItem('financas_lancamentos') || '[]');
+    function salvarFechamentoDia() {
+      const dados = calcularTotaisModal();
+      let fechamentos = JSON.parse(localStorage.getItem('financas_fechamentos') || '[]');
 
-      // Remove lançamentos prévios dessa data
-      lancamentos = lancamentos.filter(l => l.data !== dataSelecionadaFormatada);
+      fechamentos = fechamentos.filter(f => f.data !== dataSelecionadaFormatada);
 
-      // Se inseriu um valor válido, salva
-      if (valorInput > 0) {
-        lancamentos.push({
+      if (dados.bruto > 0 || dados.km > 0) {
+        fechamentos.push({
           data: dataSelecionadaFormatada,
-          valor: valorInput
+          ...dados
         });
       }
 
-      localStorage.setItem('financas_lancamentos', JSON.stringify(lancamentos));
+      localStorage.setItem('financas_fechamentos', JSON.stringify(fechamentos));
       fecharModal();
       renderizarCalendario();
     }
 
-    // Inicialização da primeira renderização
     renderizarCalendario();
   </script>
 </body>

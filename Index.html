@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Finanças Insight - Calendário Líquido</title>
+  <title>Finanças Insight - Lançamento & Calendário Líquido</title>
   <style>
     * {
       box-sizing: border-box;
@@ -20,6 +20,7 @@
       margin: 0 auto;
     }
 
+    /* Menu de Navegação */
     .navbar {
       display: flex;
       gap: 8px;
@@ -31,14 +32,15 @@
 
     .nav-btn {
       flex: 1;
-      padding: 10px;
+      padding: 12px;
       border: none;
       border-radius: 8px;
       background: transparent;
       color: #a6adc8;
       font-weight: 600;
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       cursor: pointer;
+      transition: all 0.2s ease;
     }
 
     .nav-btn.ativo {
@@ -49,23 +51,109 @@
     .aba-conteudo { display: none; }
     .aba-conteudo.ativa { display: block; }
 
-    /* Card Resumo */
-    .card-resumo-calendario {
+    /* Estilos da Aba 1: Formulário e Cards */
+    .card-painel {
       background: #1e1e2e;
       border-radius: 12px;
-      padding: 16px;
+      padding: 18px;
       margin-bottom: 16px;
       border: 1px solid #313244;
     }
 
+    .card-painel h3 {
+      font-size: 1.1rem;
+      color: #f5e0dc;
+      margin-bottom: 14px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .campo-form { margin-bottom: 4px; }
+    .campo-form.full { grid-column: span 2; }
+
+    .campo-form label {
+      display: block;
+      font-size: 0.75rem;
+      color: #a6adc8;
+      margin-bottom: 4px;
+    }
+
+    .campo-form input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #313244;
+      background: #181825;
+      color: #cdd6f4;
+      font-size: 0.9rem;
+      outline: none;
+    }
+
+    .campo-form input:focus {
+      border-color: #89b4fa;
+    }
+
+    /* Card de Feedback em Tempo Real (Cálculos Automáticos) */
+    .card-calculos-auto {
+      background: #181825;
+      border-radius: 10px;
+      padding: 14px;
+      margin-top: 14px;
+      border: 1px solid #313244;
+    }
+
+    .card-calculos-auto h4 {
+      font-size: 0.85rem;
+      color: #89b4fa;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .linha-calculo {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.82rem;
+      margin-bottom: 6px;
+      color: #bac2de;
+    }
+
+    .linha-calculo.destaque {
+      font-size: 1.05rem;
+      font-weight: bold;
+      color: #a6e3a1;
+      border-top: 1px dashed #313244;
+      padding-top: 8px;
+      margin-top: 8px;
+    }
+
+    .btn-acao {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background: #a6e3a1;
+      color: #11111b;
+      font-weight: bold;
+      font-size: 0.95rem;
+      cursor: pointer;
+      margin-top: 14px;
+      transition: background 0.2s ease;
+    }
+
+    .btn-acao:active { background: #94e2d5; }
+
+    /* Estilos da Aba 2: Calendário */
     .header-calendario-controles {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 14px;
     }
-
-    .header-calendario-controles h3 { font-size: 1.1rem; color: #f5e0dc; }
 
     .btn-nav-mes {
       background: #313244;
@@ -100,7 +188,7 @@
 
     .metrica-item strong {
       font-size: 0.85rem;
-      color: #a6e3a1; /* Verde focado no líquido */
+      color: #a6e3a1;
     }
 
     .legenda-container {
@@ -118,7 +206,6 @@
     .dot.amarelo { background-color: #f9e2af; }
     .dot.cinza { background-color: #45475a; }
 
-    /* Grade do Calendário */
     .grade-dias-semana {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
@@ -143,11 +230,10 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      cursor: pointer;
       border-left: 3px solid #45475a;
     }
 
-    .dia-card.vazio { background: transparent; border: none; cursor: default; }
+    .dia-card.vazio { background: transparent; border: none; }
     .dia-card .num-dia { font-weight: bold; font-size: 0.75rem; color: #cdd6f4; }
     .dia-card .val-faturado { font-size: 0.68rem; font-weight: 600; }
 
@@ -158,108 +244,86 @@
     .dia-card.meta-parcial .val-faturado { color: #f9e2af; }
 
     .dia-card.folga .val-faturado { color: #585b70; }
-
-    /* Modal Form Detalhado */
-    .modal-overlay {
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.75);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      padding: 16px;
-      z-index: 100;
-    }
-
-    .modal-conteudo {
-      background: #1e1e2e;
-      border-radius: 12px;
-      padding: 18px;
-      width: 100%;
-      max-width: 400px;
-      border: 1px solid #313244;
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-
-    .modal-conteudo h4 { margin-bottom: 12px; color: #f5e0dc; }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
-    .campo-modal { margin-bottom: 8px; }
-    .campo-modal.full { grid-column: span 2; }
-
-    .campo-modal label {
-      display: block;
-      font-size: 0.72rem;
-      color: #a6adc8;
-      margin-bottom: 3px;
-    }
-
-    .campo-modal input {
-      width: 100%;
-      padding: 8px;
-      border-radius: 6px;
-      border: 1px solid #313244;
-      background: #181825;
-      color: #cdd6f4;
-      font-size: 0.85rem;
-    }
-
-    /* Card Resultados Calculados */
-    .resumo-calculado-card {
-      background: #181825;
-      border-radius: 8px;
-      padding: 10px;
-      margin-top: 10px;
-      grid-column: span 2;
-      border: 1px solid #313244;
-    }
-
-    .linha-resumo {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.78rem;
-      margin-bottom: 4px;
-    }
-
-    .linha-resumo.destaque {
-      font-weight: bold;
-      font-size: 0.9rem;
-      color: #a6e3a1;
-      border-top: 1px solid #313244;
-      padding-top: 4px;
-      margin-top: 4px;
-    }
-
-    .modal-acoes { display: flex; gap: 8px; margin-top: 14px; }
-    .btn-modal { flex: 1; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
-    .btn-salvar { background: #a6e3a1; color: #11111b; }
-    .btn-fechar { background: #313244; color: #cdd6f4; }
   </style>
 </head>
 <body>
 
+  <!-- Menu Principal -->
   <nav class="navbar">
-    <button class="nav-btn ativo" onclick="trocarAba('lancamentos')">📊 Lançamentos</button>
-    <button class="nav-btn" onclick="trocarAba('calendario')">📅 Calendário</button>
+    <button class="nav-btn ativo" onclick="trocarAba('lancamentos', event)">✍️ Lançamento</button>
+    <button class="nav-btn" onclick="trocarAba('calendario', event)">📅 Calendário</button>
   </nav>
 
+  <!-- Aba 1: Lançamento Diário e Cálculos Automáticos -->
   <section id="aba-lancamentos" class="aba-conteudo ativa">
-    <div class="card-resumo-calendario">
-      <h3>Finanças Insight</h3>
-      <p style="font-size: 0.8rem; color: #a6adc8; margin-top: 6px;">
-        Clique na aba <strong>Calendário</strong> e selecione um dia para registrar seus ganhos e consumo de gasolina com cálculo de lucro líquido automático!
-      </p>
+    <div class="card-painel">
+      <h3>Registrar Dia de Trabalho</h3>
+      
+      <div class="form-grid">
+        <div class="campo-form full">
+          <label>Data do Trabalho</label>
+          <input type="date" id="input-data" onchange="carregarDadosDataSelecionada()" />
+        </div>
+
+        <div class="campo-form">
+          <label>Ganho Uber (R$)</label>
+          <input type="number" id="input-uber" placeholder="0.00" step="0.01" oninput="calcularEAtualizarAba1()" />
+        </div>
+
+        <div class="campo-form">
+          <label>Ganho 99 (R$)</label>
+          <input type="number" id="input-99" placeholder="0.00" step="0.01" oninput="calcularEAtualizarAba1()" />
+        </div>
+
+        <div class="campo-form">
+          <label>KM Rodado</label>
+          <input type="number" id="input-km" placeholder="Ex: 175" step="0.1" oninput="calcularEAtualizarAba1()" />
+        </div>
+
+        <div class="campo-form">
+          <label>Média (KM/L)</label>
+          <input type="number" id="input-kml" value="10.5" step="0.1" oninput="calcularEAtualizarAba1()" />
+        </div>
+
+        <div class="campo-form full">
+          <label>Preço Gasolina (R$/L)</label>
+          <input type="number" id="input-preco-gas" value="5.69" step="0.01" oninput="calcularEAtualizarAba1()" />
+        </div>
+      </div>
+
+      <!-- Resumo Automático Abaixo do Lançamento -->
+      <div class="card-calculos-auto">
+        <h4>⚡ Cálculos Automáticos do Dia</h4>
+        
+        <div class="linha-calculo">
+          <span>Faturamento Bruto Total:</span>
+          <strong id="calc-bruto">R$ 0,00</strong>
+        </div>
+        <div class="linha-calculo">
+          <span>Gasolina Consumida:</span>
+          <strong id="calc-litros">0,00 L</strong>
+        </div>
+        <div class="linha-calculo">
+          <span>Custo do Combustível:</span>
+          <strong id="calc-custo-gas" style="color: #f38ba8;">R$ 0,00</strong>
+        </div>
+        <div class="linha-calculo">
+          <span>Rendimento Bruto/KM:</span>
+          <strong id="calc-rend-km">R$ 0,00 / km</strong>
+        </div>
+        <div class="linha-calculo destaque">
+          <span>Lucro Líquido Final:</span>
+          <strong id="calc-liquido">R$ 0,00</strong>
+        </div>
+      </div>
+
+      <button class="btn-acao" onclick="salvarLancamentoDiario()">💾 Salvar Lançamento</button>
     </div>
   </section>
 
+  <!-- Aba 2: Calendário (Visualização de Lucro Líquido) -->
   <section id="aba-calendario" class="aba-conteudo">
-    <div class="card-resumo-calendario">
+    <div class="card-painel">
       <div class="header-calendario-controles">
         <button class="btn-nav-mes" onclick="mudarMes(-1)">◀</button>
         <h3 id="cal-titulo-mes">Mês 2026</h3>
@@ -282,85 +346,43 @@
       </div>
     </div>
 
+    <!-- Legenda de Cores -->
     <div class="legenda-container">
       <span class="item-legenda"><span class="dot verde"></span> Meta (Líquido ≥ R$ 250)</span>
       <span class="item-legenda"><span class="dot amarelo"></span> Parcial</span>
       <span class="item-legenda"><span class="dot cinza"></span> Folga</span>
     </div>
 
+    <!-- Dias da Semana -->
     <div class="grade-dias-semana">
       <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
     </div>
 
+    <!-- Grade do Calendário -->
     <div id="grade-calendario" class="grade-calendario"></div>
   </section>
 
-  <!-- Modal Formulario Detalhado -->
-  <div id="modal-dia" class="modal-overlay">
-    <div class="modal-conteudo">
-      <h4 id="modal-titulo-data">Fechamento do Dia</h4>
-      
-      <div class="form-grid">
-        <div class="campo-modal">
-          <label>Ganho Uber (R$)</label>
-          <input type="number" id="input-uber" placeholder="0.00" oninput="calcularTotaisModal()" />
-        </div>
-        <div class="campo-modal">
-          <label>Ganho 99 (R$)</label>
-          <input type="number" id="input-99" placeholder="0.00" oninput="calcularTotaisModal()" />
-        </div>
-
-        <div class="campo-modal">
-          <label>Km Rodados</label>
-          <input type="number" id="input-km" placeholder="Ex: 180" oninput="calcularTotaisModal()" />
-        </div>
-        <div class="campo-modal">
-          <label>Média (Km/L)</label>
-          <input type="number" id="input-kml" value="10.5" step="0.1" oninput="calcularTotaisModal()" />
-        </div>
-
-        <div class="campo-modal full">
-          <label>Preço Gasolina (R$/L)</label>
-          <input type="number" id="input-preco-gas" value="5.69" step="0.01" oninput="calcularTotaisModal()" />
-        </div>
-
-        <!-- Resultados em tempo real -->
-        <div class="resumo-calculado-card">
-          <div class="linha-resumo">
-            <span>Faturamento Bruto:</span>
-            <span id="res-bruto">R$ 0,00</span>
-          </div>
-          <div class="linha-resumo">
-            <span>Custo Gasolina:</span>
-            <span id="res-gasolina" style="color: #f38ba8;">R$ 0,00</span>
-          </div>
-          <div class="linha-resumo destaque">
-            <span>Ganho Líquido:</span>
-            <span id="res-liquido">R$ 0,00</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="modal-acoes">
-        <button class="btn-modal btn-fechar" onclick="fecharModal()">Cancelar</button>
-        <button class="btn-modal btn-salvar" onclick="salvarFechamentoDia()">Salvar Fechamento</button>
-      </div>
-    </div>
-  </div>
-
   <script>
+    // Configurações e Estado
     let dataAtualCal = new Date();
-    let dataSelecionadaFormatada = '';
-    const META_LIQUIDA_DIARIA = 250.00; // Meta focada no LÍQUIDO (R$ 5.500 / 22 dias)
+    const META_LIQUIDA_DIARIA = 250.00; // Meta de Lucro Líquido/Dia (Modelo Híbrido: R$ 5.500 / 22 dias)
 
-    function trocarAba(nomeAba) {
+    // Ajusta a data padrão do input para Hoje ao carregar
+    document.addEventListener("DOMContentLoaded", () => {
+      const hoje = new Date().toISOString().split('T')[0];
+      document.getElementById('input-data').value = hoje;
+      carregarDadosDataSelecionada();
+    });
+
+    // Troca de Abas
+    function trocarAba(nomeAba, evt) {
       document.querySelectorAll('.aba-conteudo').forEach(el => el.classList.remove('ativa'));
       document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('ativo'));
 
       const abaAlvo = document.getElementById(`aba-${nomeAba}`);
       if (abaAlvo) {
         abaAlvo.classList.add('ativa');
-        event.target.classList.add('ativo');
+        if (evt) evt.target.classList.add('ativo');
         
         if (nomeAba === 'calendario') {
           renderizarCalendario();
@@ -368,6 +390,76 @@
       }
     }
 
+    // Cálculos Automáticos em Tempo Real (Aba 1)
+    function calcularEAtualizarAba1() {
+      const uber = parseFloat(document.getElementById('input-uber').value) || 0;
+      const noventaNove = parseFloat(document.getElementById('input-99').value) || 0;
+      const km = parseFloat(document.getElementById('input-km').value) || 0;
+      const kml = parseFloat(document.getElementById('input-kml').value) || 10.5;
+      const precoGas = parseFloat(document.getElementById('input-preco-gas').value) || 5.69;
+
+      const bruto = uber + noventaNove;
+      const litros = kml > 0 ? km / kml : 0;
+      const custoGasolina = litros * precoGas;
+      const liquido = bruto - custoGasolina;
+      const rendimentoPorKm = km > 0 ? bruto / km : 0;
+
+      // Atualiza os elementos da tela
+      document.getElementById('calc-bruto').innerText = `R$ ${bruto.toFixed(2)}`;
+      document.getElementById('calc-litros').innerText = `${litros.toFixed(2)} L`;
+      document.getElementById('calc-custo-gas').innerText = `R$ ${custoGasolina.toFixed(2)}`;
+      document.getElementById('calc-rend-km').innerText = `R$ ${rendimentoPorKm.toFixed(2)} / km`;
+      document.getElementById('calc-liquido').innerText = `R$ ${liquido.toFixed(2)}`;
+
+      return { uber, noventaNove, km, kml, precoGas, bruto, litros, custoGasolina, liquido, rendimentoPorKm };
+    }
+
+    // Carrega dados se a data selecionada já tiver registros salvos
+    function carregarDadosDataSelecionada() {
+      const dataSel = document.getElementById('input-data').value;
+      const fechamentos = JSON.parse(localStorage.getItem('financas_fechamentos') || '[]');
+      const reg = fechamentos.find(f => f.data === dataSel);
+
+      if (reg) {
+        document.getElementById('input-uber').value = reg.uber || '';
+        document.getElementById('input-99').value = reg.noventaNove || '';
+        document.getElementById('input-km').value = reg.km || '';
+        document.getElementById('input-kml').value = reg.kml || 10.5;
+        document.getElementById('input-preco-gas').value = reg.precoGas || 5.69;
+      } else {
+        document.getElementById('input-uber').value = '';
+        document.getElementById('input-99').value = '';
+        document.getElementById('input-km').value = '';
+      }
+      calcularEAtualizarAba1();
+    }
+
+    // Salvar Lançamento Diário
+    function salvarLancamentoDiario() {
+      const dataSel = document.getElementById('input-data').value;
+      if (!dataSel) {
+        alert('Por favor, selecione uma data válida!');
+        return;
+      }
+
+      const dados = calcularEAtualizarAba1();
+      let fechamentos = JSON.parse(localStorage.getItem('financas_fechamentos') || '[]');
+
+      // Remove dados antigos daquela mesma data
+      fechamentos = fechamentos.filter(f => f.data !== dataSel);
+
+      if (dados.bruto > 0 || dados.km > 0) {
+        fechamentos.push({
+          data: dataSel,
+          ...dados
+        });
+      }
+
+      localStorage.setItem('financas_fechamentos', JSON.stringify(fechamentos));
+      alert('Lançamento salvo com sucesso! O Calendário já foi atualizado.');
+    }
+
+    // Lógica do Calendário (Aba 2)
     function mudarMes(delta) {
       dataAtualCal.setMonth(dataAtualCal.getMonth() + delta);
       renderizarCalendario();
@@ -390,12 +482,14 @@
       let totalLiquidoMes = 0;
       let diasRodados = 0;
 
+      // Alinhamento da semana
       for (let i = 0; i < primeiroDiaSemana; i++) {
         const divVazia = document.createElement('div');
         divVazia.className = 'dia-card vazio';
         containerGrade.appendChild(divVazia);
       }
 
+      // Preenchimento dos Dias
       for (let dia = 1; dia <= totalDiasMes; dia++) {
         const dataFormatada = `${ano}-${String(mes + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
         const reg = fechamentos.find(f => f.data === dataFormatada);
@@ -406,6 +500,7 @@
         const divDia = document.createElement('div');
         divDia.className = 'dia-card';
 
+        // Regra de cores pela Meta Líquida
         if (liquidoDia >= META_LIQUIDA_DIARIA) {
           divDia.classList.add('meta-atingida');
           diasRodados++;
@@ -421,73 +516,12 @@
           <span class="val-faturado">${liquidoDia > 0 ? 'R$ ' + liquidoDia.toFixed(0) : '-'}</span>
         `;
 
-        divDia.onclick = () => abrirModalDia(dataFormatada, reg);
         containerGrade.appendChild(divDia);
       }
 
       document.getElementById('cal-faturado-total').innerText = `R$ ${totalLiquidoMes.toFixed(2)}`;
       document.getElementById('cal-dias-rodados').innerText = `${diasRodados} / 22`;
     }
-
-    // Cálculos em tempo real dentro do modal
-    function calcularTotaisModal() {
-      const uber = parseFloat(document.getElementById('input-uber').value) || 0;
-      const noventaNove = parseFloat(document.getElementById('input-99').value) || 0;
-      const km = parseFloat(document.getElementById('input-km').value) || 0;
-      const kml = parseFloat(document.getElementById('input-kml').value) || 10.5;
-      const precoGas = parseFloat(document.getElementById('input-preco-gas').value) || 5.69;
-
-      const bruto = uber + noventaNove;
-      const litros = kml > 0 ? km / kml : 0;
-      const custoGasolina = litros * precoGas;
-      const liquido = bruto - custoGasolina;
-
-      document.getElementById('res-bruto').innerText = `R$ ${bruto.toFixed(2)}`;
-      document.getElementById('res-gasolina').innerText = `R$ ${custoGasolina.toFixed(2)}`;
-      document.getElementById('res-liquido').innerText = `R$ ${liquido.toFixed(2)}`;
-
-      return { bruto, custoGasolina, liquido, uber, noventaNove, km, kml, precoGas };
-    }
-
-    function abrirModalDia(dataFormatada, registroExistente) {
-      dataSelecionadaFormatada = dataFormatada;
-      const [ano, mes, dia] = dataFormatada.split('-');
-      
-      document.getElementById('modal-titulo-data').innerText = `Fechamento ${dia}/${mes}/${ano}`;
-      
-      document.getElementById('input-uber').value = registroExistente ? registroExistente.uber || '' : '';
-      document.getElementById('input-99').value = registroExistente ? registroExistente.noventaNove || '' : '';
-      document.getElementById('input-km').value = registroExistente ? registroExistente.km || '' : '';
-      document.getElementById('input-kml').value = registroExistente ? registroExistente.kml : 10.5;
-      document.getElementById('input-preco-gas').value = registroExistente ? registroExistente.precoGas : 5.69;
-
-      calcularTotaisModal();
-      document.getElementById('modal-dia').style.display = 'flex';
-    }
-
-    function fecharModal() {
-      document.getElementById('modal-dia').style.display = 'none';
-    }
-
-    function salvarFechamentoDia() {
-      const dados = calcularTotaisModal();
-      let fechamentos = JSON.parse(localStorage.getItem('financas_fechamentos') || '[]');
-
-      fechamentos = fechamentos.filter(f => f.data !== dataSelecionadaFormatada);
-
-      if (dados.bruto > 0 || dados.km > 0) {
-        fechamentos.push({
-          data: dataSelecionadaFormatada,
-          ...dados
-        });
-      }
-
-      localStorage.setItem('financas_fechamentos', JSON.stringify(fechamentos));
-      fecharModal();
-      renderizarCalendario();
-    }
-
-    renderizarCalendario();
   </script>
 </body>
 </html>
